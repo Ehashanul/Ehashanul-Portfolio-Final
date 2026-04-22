@@ -4,6 +4,7 @@ import Expertise from '../sections/Expertise';
 import About from '../sections/About';
 import ProjectShowcase from '../sections/ProjectShowcase';
 import Contact from '../sections/Contact';
+import FAQ from '../sections/FAQ';
 
 const Home = () => {
   return (
@@ -17,6 +18,7 @@ const Home = () => {
       <About />
       <Expertise />
       <ProjectShowcase />
+      <FAQ />
       <Contact />
     </motion.main>
   );

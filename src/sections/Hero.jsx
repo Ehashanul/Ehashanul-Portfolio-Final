@@ -351,7 +351,7 @@ const Beams = ({
 // BUTTON COMPONENT
 // ============================================================================
 
-const Button = ({ variant = "default", size = "sm", className = "", children, ...props }) => {
+const Button = ({ as: Component = "button", variant = "default", size = "sm", className = "", children, ...props }) => {
   const baseClasses =
     "inline-flex items-center justify-center font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 disabled:pointer-events-none disabled:opacity-50";
 
@@ -367,13 +367,13 @@ const Button = ({ variant = "default", size = "sm", className = "", children, ..
   };
 
   return (
-    <button
+    <Component
       className={`group relative overflow-hidden rounded-full ${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
       <span className="relative z-10 flex items-center">{children}</span>
       <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-    </button>
+    </Component>
   );
 };
 
@@ -480,7 +480,13 @@ export default function Hero() {
 
             {/* CTA Buttons - Modified to Download CV and Contact */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <Button size="lg" className="shadow-2xl shadow-white/25 font-semibold">
+              <Button
+                as="a"
+                href={`${import.meta.env.BASE_URL}Ehashanul_CV.pdf`}
+                download
+                size="lg"
+                className="shadow-2xl shadow-white/25 font-semibold"
+              >
                 Download CV
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>

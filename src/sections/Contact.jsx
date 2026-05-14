@@ -154,7 +154,7 @@ const Contact = () => {
           Booking 30 min free call
         </motion.h2>
         <motion.a
-          href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2Z2" 
+          href="https://calendar.app.google/rHkeNv3sS3KKR9At6" 
           target="_blank"
           rel="noopener noreferrer"
           initial={{ opacity: 0, y: 20 }}

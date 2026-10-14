@@ -1,73 +1,43 @@
-import { useEffect, useState } from 'react';
-import { motion, useSpring } from 'framer-motion';
+﻿import { useEffect, useState } from 'react';
+import { motion, useMotionValue } from 'framer-motion';
 
 const CustomCursor = () => {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-
-  const springConfig = { damping: 25, stiffness: 200 };
-  const cursorX = useSpring(0, springConfig);
-  const cursorY = useSpring(0, springConfig);
+  const cursorX = useMotionValue(0);
+  const cursorY = useMotionValue(0);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      cursorX.set(e.clientX - 16);
-      cursorY.set(e.clientY - 16);
-      setMousePos({ x: e.clientX, y: e.clientY });
+    const handlePointerMove = (event) => {
+      if (event.pointerType === 'touch') return;
+      // Align the visible tip within the transparent image with the pointer.
+      cursorX.set(event.clientX - 12);
+      cursorY.set(event.clientY - 9.36);
+      setIsVisible(true);
+      setIsHovering(Boolean(event.target.closest('a, button, [role="button"], .interactive')));
     };
-
-    const handleMouseOver = (e) => {
-      if (
-        e.target.tagName === 'A' ||
-        e.target.tagName === 'BUTTON' ||
-        e.target.closest('button') ||
-        e.target.closest('a') ||
-        e.target.classList.contains('interactive')
-      ) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseover', handleMouseOver);
-
+    const hideCursor = () => setIsVisible(false);
+    window.addEventListener('pointermove', handlePointerMove);
+    document.documentElement.addEventListener('pointerleave', hideCursor);
+    window.addEventListener('blur', hideCursor);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseover', handleMouseOver);
+      window.removeEventListener('pointermove', handlePointerMove);
+      document.documentElement.removeEventListener('pointerleave', hideCursor);
+      window.removeEventListener('blur', hideCursor);
     };
   }, [cursorX, cursorY]);
 
   return (
-    <>
-      <motion.div
-        className="fixed top-0 left-0 w-8 h-8 rounded-full border border-white/30 pointer-events-none z-[9999] flex items-center justify-center mix-blend-difference"
-        style={{
-          x: cursorX,
-          y: cursorY,
-          scale: isHovering ? 2.5 : 1,
-          backgroundColor: isHovering ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-          backdropFilter: isHovering ? 'blur(4px)' : 'none',
-        }}
-        transition={{ type: 'spring', damping: 20, stiffness: 150, mass: 0.5 }}
-      >
-        <motion.div 
-          className="w-1 h-1 bg-white rounded-full"
-          animate={{ scale: isHovering ? 0.5 : 1 }}
-        />
-      </motion.div>
-      
-      {/* Subtle trailing effect */}
-      <motion.div
-        className="fixed top-0 left-0 w-2 h-2 bg-white/20 rounded-full pointer-events-none z-[9998]"
-        animate={{
-          x: mousePos.x - 4,
-          y: mousePos.y - 4,
-        }}
-        transition={{ type: 'spring', damping: 30, stiffness: 250, mass: 0.1 }}
-      />
-    </>
+    <motion.img
+      src={`${import.meta.env.BASE_URL}cursor.png?v=2`}
+      alt=""
+      aria-hidden="true"
+      draggable={false}
+      className="fixed top-0 left-0 w-12 h-12 pointer-events-none z-[9999] select-none"
+      style={{ x: cursorX, y: cursorY, transformOrigin: '12px 9.36px' }}
+      animate={{ opacity: isVisible ? 1 : 0, scale: isHovering ? 1.2 : 1 }}
+      transition={{ duration: 0.15 }}
+    />
   );
 };
 

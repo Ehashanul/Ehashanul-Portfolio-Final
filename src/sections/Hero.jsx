@@ -4,6 +4,7 @@ import { Canvas, useFrame } from "@react-three/fiber"
 import { PerspectiveCamera } from "@react-three/drei"
 import { ArrowRight, Github, Star } from "lucide-react"
 import { Link } from "react-router-dom"
+import { trackButtonGlow } from "../utils/buttonGlow"
 
 // ============================================================================
 // BEAMS COMPONENT (3D Background)
@@ -386,7 +387,7 @@ export default function Hero() {
   return (
     <div id="home" className="relative min-h-screen w-full overflow-hidden bg-black">
       {/* Beams Background */}
-      <div className="absolute inset-0 z-0">
+      <div className="hero-background-enter absolute inset-0 z-0">
         <Beams
           beamWidth={2.5}
           beamHeight={18}
@@ -402,7 +403,7 @@ export default function Hero() {
       {/* Hero Content */}
       <div className="relative z-10 flex min-h-screen pt-16 items-center">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl text-center">
+          <div className="hero-intro mx-auto max-w-4xl text-center">
             {/* Badge */}
             <div className="mb-8 inline-flex items-center rounded-full bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 text-sm text-white/90">
               <span className="relative flex h-2 w-2 mr-3">
@@ -431,20 +432,17 @@ export default function Hero() {
 
             {/* CTA Buttons - Modified to Download CV and Contact */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <Button
-                as="a"
+              <a
                 href={`${import.meta.env.BASE_URL}Ehashanul_CV.pdf`}
                 download
-                size="lg"
-                className="shadow-2xl shadow-white/25 font-semibold"
+                className="cv-download"
+                onPointerMove={trackButtonGlow}
               >
-                Download CV
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Link to="/#contact">
-                <Button variant="outline" size="lg" className="font-semibold bg-transparent">
-                  Contact
-                </Button>
+                <span>Download CV</span>
+                <ArrowRight aria-hidden="true" className="cv-download-arrow h-5 w-5" />
+              </a>
+              <Link to="/#contact" className="contact-cta" onPointerMove={trackButtonGlow}>
+                <span>Contact</span>
               </Link>
             </div>
 

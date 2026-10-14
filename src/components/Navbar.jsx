@@ -1,17 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Menu, X } from 'lucide-react';
+import { trackButtonGlow } from '../utils/buttonGlow';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const linksRef = useRef(null);
+  const [pillSize, setPillSize] = useState({ width: 0, height: 0 });
   const { pathname } = useLocation();
   const isHome = pathname === '/';
 
+  useLayoutEffect(() => {
+    const links = linksRef.current;
+    const measure = () => setPillSize({ width: links.offsetWidth, height: links.offsetHeight });
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(links);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -33,20 +46,29 @@ const Navbar = () => {
   };
 
   return (
-    <div className="fixed top-8 left-0 right-0 z-[500] pointer-events-none flex justify-center">
+    <div className="site-nav-enter fixed top-8 left-0 right-0 z-[500] pointer-events-none flex justify-center">
       <nav 
-        className={`pointer-events-auto flex items-center justify-between px-6 py-2 rounded-full border transition-all duration-500 ${
+        className={`relative isolate pointer-events-auto flex md:grid md:grid-cols-[1fr_auto_1fr] items-center justify-between px-6 py-2 rounded-full transition-all duration-500 ease-in-out ${
           scrolled 
-            ? 'bg-black/40 backdrop-blur-2xl border-white/10 w-[90%] max-w-4xl shadow-2xl' 
-            : 'bg-transparent border-transparent w-[95%] max-w-7xl'
+            ? 'w-[90%] max-w-4xl'
+            : 'w-[95%] max-w-7xl'
         }`}
       >
+        {/* One glass surface expands from the link pill to the full navbar. */}
+        <div
+          aria-hidden="true"
+          className="absolute pointer-events-none -z-10 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 backdrop-blur-2xl transition-all duration-500 ease-in-out motion-reduce:transition-none"
+          style={{
+            width: scrolled ? '100%' : `${pillSize.width}px`,
+            height: scrolled ? '100%' : `${pillSize.height}px`,
+            opacity: scrolled || pillSize.width > 0 ? 1 : 0,
+            backgroundColor: scrolled ? 'rgba(80, 80, 80, 0.35)' : 'rgba(100, 100, 100, 0.2)',
+            boxShadow: scrolled ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : '0 0 0 0 rgba(0, 0, 0, 0)',
+          }}
+        />
         <Link to="/" className="text-xl font-bold text-white tracking-tighter shrink-0">Ehashanul Akter</Link>
 
-        {/* Desktop Navigation - The Frosted Middle Part */}
-        <div className={`hidden md:flex items-center space-x-1 rounded-full p-1 transition-all duration-500 ${
-          scrolled ? 'bg-white/5 border border-white/5' : 'bg-white/5 border border-white/10 backdrop-blur-xl'
-        }`}>
+        <div ref={linksRef} className="hidden md:flex items-center space-x-1 rounded-full border border-transparent p-1">
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -59,11 +81,13 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-4 shrink-0">
-          <Link to="/#contact" className="hidden sm:block">
-            <button className="px-5 py-2 rounded-full bg-white text-black text-[10px] font-bold uppercase tracking-widest hover:bg-p300 hover:text-white transition-all flex items-center gap-2">
-              Hire <ArrowRight className="w-3 h-3" />
-            </button>
+        <div className="flex items-center gap-4 shrink-0 justify-self-end">
+          <Link to="/#contact" className="hire-cta hidden sm:inline-flex" onPointerMove={trackButtonGlow}>
+              <span>Hire</span>
+              <span aria-hidden="true" className="hire-arrow-pulse">
+                <ArrowRight className="hire-arrow-echo w-3 h-3" />
+                <ArrowRight className="w-3 h-3" />
+              </span>
           </Link>
           
           <button 
@@ -93,10 +117,12 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
-              <Link to="/#contact" onClick={() => setMobileMenuOpen(false)}>
-                <button className="w-full py-4 rounded-xl bg-white text-black font-bold uppercase tracking-widest">
-                  Hire Me
-                </button>
+              <Link to="/#contact" onClick={() => setMobileMenuOpen(false)} className="hire-cta hire-cta-mobile" onPointerMove={trackButtonGlow}>
+                <span>Hire Me</span>
+                <span aria-hidden="true" className="hire-arrow-pulse">
+                  <ArrowRight className="hire-arrow-echo w-4 h-4" />
+                  <ArrowRight className="w-4 h-4" />
+                </span>
               </Link>
             </motion.div>
           )}

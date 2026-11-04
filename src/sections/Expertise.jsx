@@ -1,12 +1,12 @@
 import HoverStack from '../components/ui/hover-stack';
 
 const CARDS = [
-  { id:'interface', title:'Interface design', quote:'Clear layouts. Considered typography. A visual language that makes your product feel like itself.', category:'Design', tag:'UI / Visual systems', bg:'linear-gradient(145deg,#e9eaee,#bfc3ce)',ink:'#17191f' },
-  { id:'research', title:'User experience', quote:'Finding the friction, asking better questions, and shaping a simpler path for the people using your product.', category:'Understand', tag:'Research / Strategy', bg:'linear-gradient(145deg,#292c35,#15171d)' },
-  { id:'interaction', title:'Motion & interaction', quote:'Small moments of movement that make an interface easier to understand and more satisfying to use.', category:'Connect', tag:'Prototyping / Motion', bg:'linear-gradient(145deg,#3a3d46,#202228)' },
-  { id:'systems', title:'Design systems', quote:'Reusable components and thoughtful foundations that keep every screen consistent as a product grows.', category:'Build', tag:'Components / Tokens', bg:'linear-gradient(145deg,#c3c7d0,#9298a6)',ink:'#12151c' },
-  { id:'product', title:'Product design', quote:'Bringing user needs, business goals, and the smallest details together in one cohesive experience.', category:'Create', tag:'Concept / Delivery', bg:'linear-gradient(145deg,#282b32,#14161c)' },
-  { id:'development', title:'Creative development', quote:'Turning the design into a responsive, interactive website with the care it deserves.', category:'Make', tag:'Web / Interactive', bg:'linear-gradient(145deg,#454b59,#272c36)' },
+  { id:'interface', title:'Interface design', quote:'Clear layouts. Considered typography. A visual language that makes your product feel like itself.', category:'Design', tag:'UI / Visual systems', bg:'linear-gradient(145deg,#F4A9A4,#F6C29A)',ink:'#241c20' },
+  { id:'research', title:'User experience', quote:'Finding the friction, asking better questions, and shaping a simpler path for the people using your product.', category:'Understand', tag:'Research / Strategy', bg:'linear-gradient(145deg,#F1DE95,#D5E69D)',ink:'#241c20' },
+  { id:'interaction', title:'Motion & interaction', quote:'Small moments of movement that make an interface easier to understand and more satisfying to use.', category:'Connect', tag:'Prototyping / Motion', bg:'linear-gradient(145deg,#A9DCB6,#9EDDDD)',ink:'#241c20' },
+  { id:'systems', title:'Design systems', quote:'Reusable components and thoughtful foundations that keep every screen consistent as a product grows.', category:'Build', tag:'Components / Tokens', bg:'linear-gradient(145deg,#A7CFF0,#B7C0F2)',ink:'#241c20' },
+  { id:'product', title:'Product design', quote:'Bringing user needs, business goals, and the smallest details together in one cohesive experience.', category:'Create', tag:'Concept / Delivery', bg:'linear-gradient(145deg,#C9B4EC,#D4B6E8)',ink:'#241c20' },
+  { id:'development', title:'Creative development', quote:'Turning the design into a responsive, interactive website with the care it deserves.', category:'Make', tag:'Web / Interactive', bg:'linear-gradient(145deg,#ECAED4,#EDBAC4)',ink:'#241c20' },
 ];
 
 export default function Expertise() {

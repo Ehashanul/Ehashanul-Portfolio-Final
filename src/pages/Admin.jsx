@@ -60,6 +60,7 @@ export default function Admin() {
   const [filter, setFilter] = useState('active');
   const [search, setSearch] = useState('');
   const [preview, setPreview] = useState(false);
+  const [retry, setRetry] = useState(0);
   const fail = error => setError(error.message || String(error));
   const refresh = async () => {
     const [drafts, live] = await Promise.all([listDrafts(), listPublished()]);
@@ -74,8 +75,8 @@ export default function Admin() {
   useEffect(() => {
     if (!supabase) return;
     let active = true;
-    const update = next => { if (active) { setSession(next); setAllowed(false); setAuthReady(!next); } };
-    supabase.auth.getSession().then(({ data, error }) => { if (error) { fail(error); setAuthReady(true); } else update(data.session); });
+    const update = next => { if (active) { setSession(next); setAllowed(false); setAuthReady(!next); if (!next) { setRows([]); setPublished([]); setEditor(null); setDirty(false); setPreview(false); } } };
+    supabase.auth.getSession().then(({ data, error }) => { if (!active) return; if (error) { fail(error); setAuthReady(true); } else update(data.session); }).catch(error => { if (active) { fail(error); setAuthReady(true); } });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, next) => update(next));
     return () => { active = false; subscription.unsubscribe(); };
   }, []);
@@ -83,17 +84,19 @@ export default function Admin() {
   useEffect(() => {
     if (!session) return;
     let active = true;
+    setAuthReady(false);
+    setError('');
     (async () => {
       try {
         const { data, error } = await supabase.rpc('is_portfolio_admin');
         if (error) throw error;
         if (!data) throw new Error('Your account is not authorized to manage this portfolio.');
-        if (active) { setAllowed(true); await refresh(); }
+        if (active) { await refresh(); if (active) setAllowed(true); }
       } catch (error) { if (active) fail(error); }
       finally { if (active) setAuthReady(true); }
     })();
     return () => { active = false; };
-  }, [session]);
+  }, [session, retry]);
 
   useEffect(() => {
     const warn = event => { if (dirty || uploads) { event.preventDefault(); event.returnValue = ''; } };
@@ -135,12 +138,12 @@ export default function Admin() {
 
   const notice = <div aria-live="polite">{error && <p role="alert" className="admin-error">{error}</p>}{message && <p className="admin-success">{message}</p>}</div>;
   if (!authReady) return <main className="admin-shell"><p role="status">Opening your workspace…</p></main>;
-  if (!session || !allowed) return <main className="admin-shell"><section className="admin-panel max-w-md mx-auto"><p className="admin-eyebrow">Private workspace</p><h1>Portfolio studio</h1><p>Sign in with your authorized admin account.</p>{notice}{session ? <button className="admin-button" onClick={() => run(async () => { await supabase.auth.signOut(); })}>Sign out</button> : <form className="space-y-5" onSubmit={event => { event.preventDefault(); run(async () => { const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) throw error; setPassword(''); }); }}>
+  if (!session || !allowed) return <main className="admin-shell"><section className="admin-panel max-w-md mx-auto"><p className="admin-eyebrow">Private workspace</p><h1>Portfolio studio</h1><p>Sign in with your authorized admin account.</p>{notice}{session ? <div className="flex flex-wrap gap-3"><button className="admin-button admin-primary" disabled={busy} onClick={() => { setAllowed(false); setRetry(value => value + 1); }}>Retry connection</button><button className="admin-button" disabled={busy} onClick={() => run(async () => { const { error } = await supabase.auth.signOut({ scope: 'local' }); if (error) throw error; })}>Sign out</button></div> : <form className="space-y-5" onSubmit={event => { event.preventDefault(); run(async () => { const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) throw error; setPassword(''); }); }}>
     <label>Email<input required type="email" autoComplete="username" value={email} onChange={event => setEmail(event.target.value)} /></label>
     <label>Password<input required type="password" autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} /></label>
     <button disabled={busy} className="admin-button admin-primary">{busy ? 'Signing in…' : 'Sign in'}</button>
     <p className="text-xs text-white/40">Accounts are created by the portfolio owner. Public registration is disabled.</p>
-  </form>}</section></main>;
+  </form>}<Link to="/" className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white mt-6"><ArrowLeft size={14} /> Back to portfolio</Link></section></main>;
 
   const visible = rows.filter(row => Boolean(row.deleted_at) === (filter === 'trash') && row.content.title.toLowerCase().includes(search.toLowerCase()));
   return <main className="admin-shell">

@@ -30,11 +30,13 @@ function ScrollToTop() {
   return null;
 }
 
-function App() {
+function AppLayout() {
+  const { pathname } = useLocation();
+  const isAdmin = pathname.replace(/\/+$/, '') === '/admin';
   return (
-    <Router>
+    <>
       <ScrollToTop />
-      <div className="relative min-h-screen cursor-none">
+      <div className={isAdmin ? 'admin-layout relative min-h-screen' : 'relative min-h-screen cursor-none'}>
         <CustomCursor />
         {/* Background Layers */}
         <div className="bg-grid" />
@@ -42,7 +44,7 @@ function App() {
         <div className="bg-orb w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(255,255,255,0.03),transparent_70%)] -bottom-24 -right-20 animate-orb-drift [animation-direction:reverse]" />
         <div className="bg-noise" />
 
-        <Navbar />
+        {!isAdmin && <Navbar />}
 
         <AnimatePresence mode="wait">
           <Routes>
@@ -53,7 +55,7 @@ function App() {
           </Routes>
         </AnimatePresence>
 
-        <footer className="relative z-10 bg-black overflow-hidden">
+        {!isAdmin && <footer className="relative z-10 bg-black overflow-hidden">
           {/* Top bar */}
           <div className="border-t border-white/[0.07] px-8 py-4 flex justify-between items-center">
             <span className="text-white/40 font-mono text-[10px] tracking-widest">
@@ -78,10 +80,14 @@ function App() {
             grain={0.25}
             className="select-none"
           />
-        </footer>
+        </footer>}
       </div>
-    </Router>
+    </>
   );
+}
+
+function App() {
+  return <Router><AppLayout /></Router>;
 }
 
 export default App;

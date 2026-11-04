@@ -1,132 +1,85 @@
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { useInView, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { ArrowUpRight } from 'lucide-react';
 
-const About = () => {
-  const sentence = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        delayChildren: 0.2,
-        staggerChildren: 0.05,
-      },
-    },
-  };
+const WORDS = [
+  ['I’m',false],['Ehashanul,',true],['a',false],['UI/UX',true],['designer',true],['who',false],
+  ['turns',false],['complex',false],['ideas',false],['into',false],['clear,',true],['intuitive',true],
+  ['digital',false],['experiences.',false],
+];
 
-  const word = {
-    hidden: { opacity: 0.1, y: 10 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: [0.2, 0.65, 0.3, 0.9],
-      }
-    },
-  };
+export default function About() {
+  const frameRef = useRef(null);
+  const cursorRef = useRef(null);
+  const clickRef = useRef(null);
+  const boxRef = useRef(null);
+  const played = useRef(false);
+  const inView = useInView(frameRef, { amount: 0.35, once: true });
+  const reduced = useReducedMotion();
+  const [completed, setCompleted] = useState(false);
+  const [interacting, setInteracting] = useState(false);
 
-  const textLines = [
-    "As a designer — I believe",
-    "that design is not just",
-    "about appearance but",
-    "also about creating —",
-    "immersive and meaningful",
-    "— experiences."
-  ];
-
-  return (
-    <section id="about" className="py-40 px-14 max-w-7xl mx-auto relative z-10 overflow-hidden bg-black">
-      {/* Enhanced Animated Grid Background */}
-      <div className="absolute inset-0 z-[-1] overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:60px_60px] animate-grid-drift" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.05),transparent_50%)] animate-pulse" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-p500/10 rounded-full blur-[120px] animate-orb-drift" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-b500/10 rounded-full blur-[120px] animate-orb-drift [animation-direction:reverse]" />
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || !inView || reduced || interacting || played.current) return;
+    let alive = true;
+    let animations = [];
+    document.fonts.ready.then(() => {
+      if (!alive || played.current) return;
+      played.current = true;
+      const { width, height } = frame.getBoundingClientRect();
+      const position = (x,y) => `translate3d(${x}px,${y}px,0)`;
+      const duration = 4200;
+      const cursor = cursorRef.current.animate([
+        { offset: 0, transform: position(width * 0.7,height * 0.2), opacity: 0 },
+        { offset: 0.1, transform: position(width * 0.7,height * 0.2), opacity: 1 },
+        { offset: 0.26, transform: position(0,0), opacity: 1 },
+        { offset: 0.32, transform: position(0,0), opacity: 1 },
+        { offset: 0.72, transform: position(width,height), opacity: 1 },
+        { offset: 0.84, transform: position(width,height), opacity: 1 },
+        { offset: 1, transform: position(width,height), opacity: 1 },
+      ], { duration, fill: 'forwards', easing: 'ease-in-out' });
+      const box = boxRef.current.animate([
+        { offset: 0, width: '0%', height: '0%', opacity: 0 },
+        { offset: 0.32, width: '0%', height: '0%', opacity: 0 },
+        { offset: 0.33, width: '1%', height: '1%', opacity: 1 },
+        { offset: 0.72, width: '100%', height: '100%', opacity: 1 },
+        { offset: 1, width: '100%', height: '100%', opacity: 1 },
+      ], { duration, fill: 'forwards', easing: 'ease-in-out' });
+      const click = clickRef.current.animate([
+        { offset: 0, transform: 'translate(-50%,-50%) scale(0.3)', opacity: 0 },
+        { offset: 0.26, transform: 'translate(-50%,-50%) scale(0.3)', opacity: 0 },
+        { offset: 0.28, transform: 'translate(-50%,-50%) scale(0.6)', opacity: 0.8 },
+        { offset: 0.34, transform: 'translate(-50%,-50%) scale(1.7)', opacity: 0 },
+        { offset: 1, transform: 'translate(-50%,-50%) scale(1.7)', opacity: 0 },
+      ], { duration, fill: 'forwards' });
+      animations = [cursor,box,click];
+      cursor.onfinish = () => { if (alive) { cursor.cancel(); setCompleted(true); } };
+    });
+    return () => { alive = false; animations.forEach(animation => animation.cancel()); };
+  }, [inView,reduced,interacting]);
+  return <section id="about" className="about-selection-section relative z-10 bg-black py-24 md:py-32 px-6 md:px-14">
+    <div className="max-w-7xl mx-auto">
+      <h2 className="text-white/40 font-mono text-[10px] uppercase tracking-[0.3em] mb-10">About me</h2>
+      <div ref={frameRef} className={`about-selection-frame ${completed || reduced ? 'about-selection-complete' : ''}`} onPointerDown={() => { setCompleted(true); setInteracting(true); }}>
+        <span aria-hidden="true" ref={boxRef} className="about-drag-selection">{['top-left','top-right','bottom-left','bottom-right'].map(corner => <span key={corner} className={`about-frame-handle about-frame-${corner}`} />)}</span>
+        <p className="about-belief-label">A little about me</p>
+        <blockquote className="about-selection-quote">
+          <span aria-hidden="true" className="about-quote-mark">“</span>
+          {WORDS.map(([word,bold],index) => <span key={index}><span data-about-word className={`about-selection-word ${bold ? 'about-word-bold' : ''}`}><span className="relative">{word}</span></span>{index < WORDS.length - 1 ? ' ' : ''}</span>)}
+          <span aria-hidden="true" className="about-quote-mark">”</span>
+        </blockquote>
+        <span aria-hidden="true" ref={clickRef} className="about-auto-click" />
+        <span aria-hidden="true" ref={cursorRef} className="about-auto-cursor">
+          <svg width="26" height="32" viewBox="0 0 26 32" fill="none"><path d="M3 2L22 19L13 20L9 29L3 2Z" fill="#ffffff" stroke="#17181c" strokeWidth="1.5" strokeLinejoin="round" /></svg>
+          <span className="about-cursor-label">Ehashanul</span>
+        </span>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* Left Label */}
-        <div className="lg:col-span-2">
-          <div className="text-white/40 font-mono text-[10px] uppercase tracking-[0.3em] sticky top-32">
-            About Me
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="lg:col-span-10">
-          <motion.div 
-            variants={sentence}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="max-w-5xl"
-          >
-            {textLines.map((line, lineIndex) => (
-              <div key={lineIndex} className="overflow-hidden mb-1">
-                <motion.h2 
-                  className={`text-4xl sm:text-6xl lg:text-[5.5rem] font-bold leading-[1.05] tracking-[-0.03em] ${
-                    lineIndex >= 3 ? 'text-white/30' : 'text-white'
-                  }`}
-                >
-                  {line.split(" ").map((w, i) => (
-                    <motion.span 
-                      key={i} 
-                      variants={word}
-                      className="inline-block mr-[0.2em] hover:text-white transition-colors duration-300 cursor-default"
-                    >
-                      {w === "meaningful" ? (
-                        <span className="relative inline-flex items-center">
-                          {w}
-                          <span className="ml-4 flex -space-x-2">
-                            {[1, 2, 3].map((n) => (
-                              <div key={n} className="w-8 h-8 rounded-full border border-white/20 bg-white/10 backdrop-blur-md flex items-center justify-center text-[10px]">
-                                {n === 1 ? '✦' : n === 2 ? '◈' : '○'}
-                              </div>
-                            ))}
-                          </span>
-                        </span>
-                      ) : w}
-                    </motion.span>
-                  ))}
-                </motion.h2>
-              </div>
-            ))}
-          </motion.div>
-
-          <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-20">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.8, duration: 1 }}
-              className="text-white/50 text-lg leading-relaxed max-w-sm"
-            >
-              My journey in design is driven by curiosity and problem-solving. I translate complex ideas into simple, user-friendly experiences that not only look good but also make a real impact.
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 1, duration: 1 }}
-              className="flex flex-col items-start gap-8"
-            >
-              <Link to="/#work" className="group flex items-center gap-4 text-white font-medium tracking-widest uppercase text-xs">
-                Learn More
-                <span className="w-12 h-px bg-white/20 group-hover:w-20 group-hover:bg-white transition-all duration-500" />
-              </Link>
-
-              {/* Decorative Boxes from the image style */}
-              <div className="flex gap-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-24 h-32 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors" />
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </div>
+      <div className="mt-10 md:mt-14 flex flex-col md:flex-row justify-between items-start gap-8">
+        <p className="text-white/45 text-base md:text-lg leading-relaxed max-w-xl">I work across research, interface design, and interaction. I enjoy untangling difficult problems and refining the small details that make websites and apps feel easy to use.</p>
+        <Link to="/#work" className="inline-flex gap-3 items-center text-xs font-mono uppercase tracking-[0.15em] text-white/75 hover:text-white py-3">Explore my work <ArrowUpRight size={17} aria-hidden="true" /></Link>
       </div>
-    </section>
-  );
-};
-
-export default About;
+    </div>
+  </section>;
+}

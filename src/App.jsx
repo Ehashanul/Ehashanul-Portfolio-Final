@@ -7,6 +7,7 @@ import AllProjects from './pages/AllProjects';
 import Admin from './pages/Admin';
 import CustomCursor from './components/CustomCursor';
 import Navbar from './components/Navbar';
+import HalftoneWordmarkFooter from './components/ui/halftone-wordmark-footer';
 
 // Component to handle scroll reset on route change
 function ScrollToTop() {
@@ -65,19 +66,18 @@ function App() {
             </div>
           </div>
 
-          {/* Massive name — left aligned, flush to bottom */}
-          <div className="relative overflow-hidden leading-none select-none">
-            {/* Ghost rounded rectangle logo mark */}
-            <div className="absolute left-[-2vw] top-1/2 -translate-y-1/2 w-[16vw] h-[14vw] rounded-[2.5vw] border-[2.5vw] border-white/[0.07] pointer-events-none" />
-
-            {/* Left & right dark edge vignettes */}
-            <div className="absolute left-0 top-0 h-full w-32 bg-gradient-to-r from-black to-transparent pointer-events-none z-10" />
-            <div className="absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-black to-transparent pointer-events-none z-10" />
-
-            <h2 className="font-bebas text-[19vw] leading-none tracking-tight text-white pl-[8vw] pb-0 -mb-[1.5vw]">
-              EHASHANUL
-            </h2>
-          </div>
+          <HalftoneWordmarkFooter
+            wordmark="EHASHANUL"
+            fontFamily='"Bebas Neue", sans-serif'
+            fontWeight={400}
+            palette={{ background: '#000000', ink: '#f0f1f5', warm: '#b8c9f2' }}
+            height="clamp(170px, 24vw, 420px)"
+            dotGap={5}
+            radius={90}
+            crop={0.12}
+            grain={0.25}
+            className="select-none"
+          />
         </footer>
       </div>
     </Router>

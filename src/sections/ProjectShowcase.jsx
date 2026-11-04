@@ -1,69 +1,24 @@
-import { mediaUrl } from '../utils/projectMedia';
-import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowUpRight } from 'lucide-react';
 import { useProjects } from '../hooks/useProjects';
+import { mediaUrl } from '../utils/projectMedia';
+import WorksWheel from '../components/ui/works-wheel';
 
-const ProjectCard = ({ project }) => {
-  const isLarge = project.size === 'large';
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className={`relative group overflow-hidden rounded-[32px] bg-white/[0.04] ${isLarge ? 'col-span-2 aspect-[16/9]' : 'col-span-1 aspect-square'}`}
-    >
-      <Link to={`/project/${project.id}`}>
-        {!project.hideCardImage && <img
-          src={mediaUrl(project.thumbnail || project.img)}
-          alt={project.thumbnailAlt || project.title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
-        
-        <div className="absolute bottom-8 left-8 right-8 flex flex-col items-start">
-          {!project.hideCardTitle && <h3 className="font-bebas text-3xl lg:text-5xl tracking-widest text-white mb-2">{project.title}</h3>}
-          {!project.hideCardSubtitle && <p className="text-white/40 font-mono text-[10px] uppercase tracking-[0.2em]">{project.sub}</p>}
-        </div>
-
-        {/* Hover Overlay Icon */}
-        <div className="absolute top-8 right-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-[-10px] group-hover:translate-y-0">
-          <span className="text-white text-xl">↗</span>
-        </div>
-      </Link>
-    </motion.div>
-  );
-};
-
-const ProjectShowcase = () => {
+export default function ProjectShowcase() {
   const projects = useProjects();
-  const featuredProjects = projects.filter(project => project.featured !== false).slice(0, 3);
+  const items = useMemo(() => projects.filter(project => project.featured !== false).map((project,index) => ({
+    id: project.id,
+    title: project.hideCardTitle ? `Project ${String(index + 1).padStart(2,'0')}` : project.title,
+    image: project.hideCardImage ? '' : mediaUrl(project.thumbnail || project.img || project.heroImage),
+    href: `/project/${project.id}`,
+  })), [projects]);
 
-  return (
-    <section id="work" className="py-40 px-14 max-w-7xl mx-auto relative z-10">
-      <div className="flex justify-between items-end mb-20">
-        <div>
-          <div className="flex items-center gap-4 text-p300 font-mono text-[10.5px] uppercase tracking-widest mb-4">
-            <div className="w-7 h-px bg-p300 shadow-[0_0_8px_#a78bfa]" />
-            Portfolio
-          </div>
-          <h2 className="font-bebas text-6xl lg:text-9xl tracking-wider">
-            BEST <span className="bg-grd-accent bg-clip-text text-transparent">PROJECTS</span>
-          </h2>
-        </div>
-        
-        <Link to="/projects" className="flex items-center gap-2 text-white/40 font-mono text-[11px] uppercase tracking-[0.3em] hover:text-p300 transition-colors mb-4 group">
-          See More <span className="inline-block transition-transform group-hover:translate-x-1 group-hover:-translate-y-1">↗</span>
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 lg:gap-6">
-        {featuredProjects.map((proj) => (
-          <ProjectCard key={proj.id} project={proj} />
-        ))}
-      </div>
-    </section>
-  );
-};
-
-export default ProjectShowcase;
+  return <section id="work" className="work-showcase relative z-10 bg-black py-24 md:py-32">
+    <header className="max-w-7xl mx-auto px-6 md:px-14 flex flex-wrap justify-between items-end gap-6 mb-8">
+      <div><p className="font-mono text-[10px] text-white/40 uppercase tracking-[0.3em] mb-5">Selected work · Thoughtfully made</p><h2 className="font-bebas text-6xl md:text-8xl lg:text-9xl tracking-wide leading-none">BEST <span className="text-white/45">PROJECTS</span></h2></div>
+      <Link to="/projects" className="inline-flex items-center gap-3 text-white/55 hover:text-white text-[10px] font-mono uppercase tracking-[0.2em] py-3">All projects <ArrowUpRight size={16} aria-hidden="true" /></Link>
+    </header>
+    {items.length ? <div className="work-wheel-stage"><WorksWheel key={items.map(item=>item.id).join('|')} items={items} label="Selected works" action="View project" className="font-outfit" /></div> : <p className="max-w-7xl mx-auto px-6 md:px-14 py-20 text-white/40">Featured projects will appear here when published.</p>}
+  </section>;
+}

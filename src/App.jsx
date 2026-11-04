@@ -1,8 +1,7 @@
-import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
 import Home from './pages/Home';
-import ProjectDetails from './pages/ProjectDetails';
 import AllProjects from './pages/AllProjects';
 import Admin from './pages/Admin';
 import CustomCursor from './components/CustomCursor';
@@ -50,7 +49,7 @@ function AppLayout() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/projects" element={<AllProjects />} />
-            <Route path="/project/:id" element={<ProjectDetails />} />
+            <Route path="/project/:id" element={<Navigate to="/projects" replace />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </AnimatePresence>

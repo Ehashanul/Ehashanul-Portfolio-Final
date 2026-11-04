@@ -30,7 +30,7 @@ test('failed image uploads never publish a partially prepared snapshot', async (
   assert.equal(published, false);
 });
 
-test('a shared private image is copied once and only public URLs enter the snapshot', async () => {
+test('shared images are uploaded once and existing media remains compatible with cloud publishing', async () => {
   let uploads = 0;
   let payload;
   const bucket = {
@@ -43,16 +43,21 @@ test('a shared private image is copied once and only public URLs enter the snaps
   await api.publishDraft(draft);
   assert.equal(uploads, 1);
   assert.equal(payload.published_content.thumbnail, payload.published_content.gallery[0]);
+  assert.equal(payload.published_content.thumbnail, payload.published_content.heroImage);
   assert.match(payload.published_content.thumbnail, /^https:/);
   assert.equal(draft.content.thumbnail, 'private:one.webp');
 });
 
-test('publishing requires both primary images', async () => {
-  const api = await load({});
-  await assert.rejects(api.publishDraft({ content: { thumbnail: '/image.png' } }), /hero image/);
+test('publishing a card needs a thumbnail but no hero image', async () => {
+  let snapshot;
+  const api = await load({ rpc: async (_name, args) => { snapshot = args.published_content; return { error: null }; } });
+  await assert.rejects(api.publishDraft({ content: { title: 'Example' } }), /project image/);
+  await api.publishDraft({ content: { title: 'Example', thumbnail: '/image.png', featured: true } });
+  assert.equal(snapshot.thumbnail, '/image.png');
+  assert.equal(snapshot.featured, true);
 });
 
-test('hidden sections stay out of public snapshots while the editable draft is preserved', async () => {
+test('hidden legacy sections stay private and existing draft content is preserved', async () => {
   let snapshot;
   const api = await load({ rpc: async (_name,args) => { snapshot = args.published_content; return { error: null }; } });
   const draft = { id: 'example', content: { title: 'Example', hideCardImage: true, hideHero: true, sections: [
@@ -64,6 +69,11 @@ test('hidden sections stay out of public snapshots while the editable draft is p
   assert.equal(snapshot.sections[0].id, 'intro');
   assert.equal(draft.content.sections.length, 2);
   assert.ok(!JSON.stringify(snapshot).includes('confidential'));
+});
+
+test('unsafe external project links are rejected before publishing', async () => {
+  const api = await load({ rpc: () => { throw new Error('Must not publish'); } });
+  await assert.rejects(api.publishDraft({ content: { hideCardImage: true, liveUrl: 'javascript:alert(1)' } }), /https/);
 });
 
 test('backend publication errors reach the editor instead of reporting success', async () => {

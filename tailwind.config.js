@@ -18,8 +18,8 @@ export default {
         c300: "#aaaaaa",
       },
       fontFamily: {
-        outfit: ['Outfit', 'sans-serif'],
-        bebas: ['Bebas Neue', 'sans-serif'],
+        sans: ['Outfit', 'sans-serif'],
+        display: ['Outfit', 'sans-serif'],
         mono: ['Space Mono', 'monospace'],
       },
       backgroundImage: {

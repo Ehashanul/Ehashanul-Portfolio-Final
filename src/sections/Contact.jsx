@@ -149,7 +149,7 @@ const Contact = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="font-bebas text-5xl lg:text-7xl tracking-wider text-white mb-8"
+          className="font-display text-5xl lg:text-7xl tracking-wider text-white mb-8"
         >
           Booking 30 min free call
         </motion.h2>
@@ -177,7 +177,7 @@ const Contact = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          <h2 className="font-bebas text-6xl lg:text-8xl tracking-wider leading-none text-white mb-16">
+          <h2 className="font-display text-6xl lg:text-8xl tracking-wider leading-none text-white mb-16">
             LET'S START<br />CREATING<br />TOGETHER
           </h2>
 
@@ -264,7 +264,7 @@ const Contact = () => {
                 <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-8 text-green-500">
                   <CheckCircle size={40} />
                 </div>
-                <h3 className="font-bebas text-4xl text-white mb-4 tracking-widest">MESSAGE SENT!</h3>
+                <h3 className="font-display text-4xl text-white mb-4 tracking-widest">MESSAGE SENT!</h3>
                 <p className="text-white/40 font-mono text-[10px] uppercase tracking-widest leading-relaxed">
                   Thank you for reaching out.<br />I will get back to you at ehashanula@gmail.com soon.
                 </p>

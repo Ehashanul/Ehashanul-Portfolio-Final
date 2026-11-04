@@ -30,8 +30,8 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Home', href: isHome ? '#home' : '/#home' },
-    { name: 'Expertise', href: isHome ? '#expertise' : '/#expertise' },
     { name: 'Work', href: isHome ? '#work' : '/#work' },
+    { name: 'Expertise', href: isHome ? '#expertise' : '/#expertise' },
     { name: 'About', href: isHome ? '#about' : '/#about' },
   ];
 
@@ -83,7 +83,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-4 shrink-0 justify-self-end">
           <Link to="/#contact" className="hire-cta hidden sm:inline-flex" onPointerMove={trackButtonGlow}>
-              <span>Hire</span>
+              <span>Let's Talk</span>
               <span aria-hidden="true" className="hire-arrow-pulse">
                 <ArrowRight className="hire-arrow-echo w-3 h-3" />
                 <ArrowRight className="w-3 h-3" />
@@ -112,13 +112,13 @@ const Navbar = () => {
                   key={link.name}
                   to={link.href}
                   onClick={() => handleLinkClick(link.href)}
-                  className="text-2xl font-bebas tracking-widest text-white/70 hover:text-white"
+                  className="text-2xl font-display tracking-widest text-white/70 hover:text-white"
                 >
                   {link.name}
                 </Link>
               ))}
               <Link to="/#contact" onClick={() => setMobileMenuOpen(false)} className="hire-cta hire-cta-mobile" onPointerMove={trackButtonGlow}>
-                <span>Hire Me</span>
+                <span>Let's Talk</span>
                 <span aria-hidden="true" className="hire-arrow-pulse">
                   <ArrowRight className="hire-arrow-echo w-4 h-4" />
                   <ArrowRight className="w-4 h-4" />

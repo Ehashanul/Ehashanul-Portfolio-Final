@@ -1,4 +1,5 @@
 import HoverStack from '../components/ui/hover-stack';
+import SectionHeading from '../components/SectionHeading';
 
 const CARDS = [
   { id:'interface', title:'Interface design', quote:'Clear layouts. Considered typography. A visual language that makes your product feel like itself.', category:'Design', tag:'UI / Visual systems', bg:'linear-gradient(145deg,#F4A9A4,#F6C29A)',ink:'#241c20' },
@@ -12,7 +13,7 @@ const CARDS = [
 export default function Expertise() {
   return <section id="expertise" className="expertise-hover-section relative z-10 bg-black py-24 md:py-32 px-6 md:px-14">
     <div className="max-w-7xl mx-auto">
-      <header className="mb-14 md:mb-20"><p className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/40 mb-5">The thinking. The making. The details.</p><div className="flex flex-col md:flex-row justify-between md:items-end gap-6"><h2 className="font-bebas text-6xl md:text-8xl lg:text-9xl tracking-wide leading-none">EXPERTISE & <span className="text-white/45">CRAFT</span></h2><p className="text-white/45 text-sm leading-relaxed max-w-xs">A considered blend of strategy, visual design, and interaction. Built around people.</p></div></header>
+      <SectionHeading number="01" label="What I do" title="Expertise &" accent="craft" description="Thoughtful design, from the first question to the final interaction." />
       <HoverStack cards={CARDS} />
     </div>
   </section>;

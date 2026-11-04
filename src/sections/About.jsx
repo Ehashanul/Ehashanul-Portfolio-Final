@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useInView, useReducedMotion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 const WORDS = [
   ['I’m',false],['Ehashanul,',true],['a',false],['UI/UX',true],['designer',true],['who',false],
@@ -61,7 +60,13 @@ export default function About() {
   }, [inView,reduced,interacting]);
   return <section id="about" className="about-selection-section relative z-10 bg-black py-24 md:py-32 px-6 md:px-14">
     <div className="max-w-7xl mx-auto">
-      <h2 className="text-white/40 font-mono text-[10px] uppercase tracking-[0.3em] mb-10">About me</h2>
+      <div className="flex flex-wrap items-center justify-between gap-5 mb-10">
+        <h2 className="text-white/40 font-mono text-[10px] uppercase tracking-[0.3em]">About me</h2>
+        <a href={`${import.meta.env.BASE_URL}Ehashanul_CV.pdf`} download className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.025] px-4 py-2.5 text-[10px] font-mono uppercase tracking-[0.12em] text-white/70 hover:text-white hover:border-white/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D8FF5F]">
+          <span>Download CV</span>
+          <Download aria-hidden="true" size={14} />
+        </a>
+      </div>
       <div ref={frameRef} className={`about-selection-frame ${completed || reduced ? 'about-selection-complete' : ''}`} onPointerDown={() => { setCompleted(true); setInteracting(true); }}>
         <span aria-hidden="true" ref={boxRef} className="about-drag-selection">{['top-left','top-right','bottom-left','bottom-right'].map(corner => <span key={corner} className={`about-frame-handle about-frame-${corner}`} />)}</span>
         <p className="about-belief-label">A little about me</p>
@@ -72,13 +77,9 @@ export default function About() {
         </blockquote>
         <span aria-hidden="true" ref={clickRef} className="about-auto-click" />
         <span aria-hidden="true" ref={cursorRef} className="about-auto-cursor">
-          <svg width="26" height="32" viewBox="0 0 26 32" fill="none"><path d="M3 2L22 19L13 20L9 29L3 2Z" fill="#ffffff" stroke="#17181c" strokeWidth="1.5" strokeLinejoin="round" /></svg>
+          <svg width="26" height="32" viewBox="0 0 26 32" fill="none"><path d="M3 2L22 19L13 20L9 29L3 2Z" fill="#D8FF5F" stroke="#11140a" strokeWidth="1.5" strokeLinejoin="round" /></svg>
           <span className="about-cursor-label">Ehashanul</span>
         </span>
-      </div>
-      <div className="mt-10 md:mt-14 flex flex-col md:flex-row justify-between items-start gap-8">
-        <p className="text-white/45 text-base md:text-lg leading-relaxed max-w-xl">I work across research, interface design, and interaction. I enjoy untangling difficult problems and refining the small details that make websites and apps feel easy to use.</p>
-        <Link to="/#work" className="inline-flex gap-3 items-center text-xs font-mono uppercase tracking-[0.15em] text-white/75 hover:text-white py-3">Explore my work <ArrowUpRight size={17} aria-hidden="true" /></Link>
       </div>
     </div>
   </section>;

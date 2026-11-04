@@ -36,14 +36,17 @@ Restart `npm run dev`. Open `http://localhost:5173/Ehashanul-Portfolio-Final/#/a
 ## 3. Start managing projects
 
 - Sign in. On an empty workspace, import the existing projects as drafts.
-- Edit a draft, upload thumbnail/hero/gallery images, set order (lower numbers first), and choose whether it is featured.
+- Edit a draft, upload project card images, set order (lower numbers first), and choose whether it is featured.
 - Save draft keeps the public version unchanged. Save & publish publishes a snapshot.
 - Uploads accept JPG/PNG/WebP, optimize to WebP at up to 2400 px, and enforce a 5 MB output limit.
 - Draft uploads are private. Publishing copies referenced files to a public bucket. Unpublishing hides the project, but already-public media URLs remain accessible.
 - Trash removes the published project and retains its editable draft. Restore returns it to drafts, not to public view.
 - Project IDs are stable and kept when editing. Display titles can change without breaking links.
-- Use **Customize page sections** to convert an existing case study into flexible sections. Add, hide, remove, or reorder text, images, galleries, result metrics, and external links. Empty section lists intentionally show no body content. Hidden sections are retained in drafts but excluded from published snapshots.
-- Card title/subtitle/image and detail-page hero/metadata can be hidden independently. Deliverables and live project links appear only when supplied. Existing projects keep their legacy text/gallery layout until you customize it.
+- The public portfolio now has two views: selected projects on the homepage and the complete gallery at `/#/projects`. Individual project URLs redirect to the gallery.
+- Edit each card's title, short description, category, image, image description, display order, and optional external project link.
+- Enable **Selected project: show on homepage** to feature a published card. Every published project appears on All Projects.
+- Only a project card image is required to publish, unless you choose to hide it. A hero image and case-study content are no longer required.
+- Old case-study fields and media remain compatible with saved drafts and cloud publishing, but have no public detail page or editor controls.
 - The content export includes drafts and current published data, **not image files**. Download both Storage buckets separately for a full backup. Never commit private draft exports to the public repository.
 
 The public site fetches the current published list on mount and on window focus. An empty published list stays empty. On a network failure it uses the bundled snapshot, which may be older. To refresh that outage snapshot, update `src/data/projects.js` with reviewed public data and deploy it; do not include drafts.

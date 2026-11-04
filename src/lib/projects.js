@@ -39,7 +39,12 @@ export async function previewImage(path) {
 
 export async function publishDraft(draft) {
   const content = structuredClone(draft.content);
-  if ((!content.thumbnail && !content.hideCardImage) || (!content.heroImage && !content.hideHero)) throw new Error('Add a thumbnail and hero image, or hide those images, before publishing.');
+  if (!content.thumbnail && !content.hideCardImage) throw new Error('Add a project image or hide the project image before publishing.');
+  if (content.liveUrl) {
+    let url;
+    try { url = new URL(content.liveUrl); } catch { throw new Error('Enter a valid external project URL.'); }
+    if (!['https:', 'http:'].includes(url.protocol)) throw new Error('Use an https:// or http:// project link.');
+  }
   const replacements = new Map();
   const publishImage = async value => {
     if (!value?.startsWith('private:')) return value;

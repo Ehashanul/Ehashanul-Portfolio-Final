@@ -1,6 +1,7 @@
 export const projects = [
   {
     id: 'unblur',
+    featured: true,
     title: 'Tom Ford',
     sub: 'Ombre Leather',
     thumbnail: '/project-1.png',
@@ -19,6 +20,7 @@ export const projects = [
   },
   {
     id: 'lampre',
+    featured: true,
     title: 'Lampre',
     sub: 'Editorial',
     thumbnail: '/project-2.png',
@@ -37,6 +39,7 @@ export const projects = [
   },
   {
     id: 'lexus',
+    featured: false,
     title: 'Lexus',
     sub: 'Automotive',
     thumbnail: '/project-3.png',

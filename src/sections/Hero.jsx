@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { trackButtonGlow } from '../utils/buttonGlow';
 import { WovenCanvas } from '../components/ui/woven-light-hero';
+import ShinyButton from '../components/ui/shiny-button';
 export default function Hero() {
   const reduced = useReducedMotion();
   const enter = delay => ({ initial: { opacity: reduced ? 1 : 0, y: reduced ? 0 : 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: reduced ? 0 : 0.85, delay: reduced ? 0 : delay, ease: [0.2, 0.65, 0.3, 0.9] } });
@@ -21,7 +22,7 @@ export default function Hero() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
               </span>
-              Associate UI/UX Designer
+              UI/UX Designer · UX Researcher
             </motion.div>
 
             {/* Main Heading */}
@@ -31,44 +32,42 @@ export default function Hero() {
               </span>{" "}
               <br />
               <span className="text-2xl sm:text-3xl lg:text-4xl font-light text-white/80">
-                Designing digital experiences.
+                Making complex feel simple.
               </span>
             </motion.h1>
 
             {/* Subtitle */}
             <motion.p {...enter(0.55)} className="mb-10 text-lg leading-8 text-white/80 sm:text-xl lg:text-2xl max-w-3xl mx-auto">
-              UI/UX designer turning complex ideas into simple, engaging products.
+              I design thoughtful digital experiences that bring together usability, creativity, and real-world problem-solving.
             </motion.p>
 
-            {/* CTA Buttons - Modified to Download CV and Contact */}
+            {/* Hero section navigation */}
             <motion.div {...enter(0.75)} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <a
-                href={`${import.meta.env.BASE_URL}Ehashanul_CV.pdf`}
-                download
-                className="cv-download"
-                onPointerMove={trackButtonGlow}
-              >
-                <span>Download CV</span>
-                <ArrowRight aria-hidden="true" className="cv-download-arrow h-5 w-5" />
-              </a>
-              <Link to="/#contact" className="contact-cta" onPointerMove={trackButtonGlow}>
-                <span>Contact</span>
+              <ShinyButton
+                to="/#work"
+                label="Explore My Work"
+                accentColor="#D8FF5F"
+                accentSoftColor="#E9FFA3"
+                icon={<ArrowRight aria-hidden="true" className="shrink-0 h-5 w-5" />}
+              />
+              <Link to="/#about" className="contact-cta" onPointerMove={trackButtonGlow}>
+                <span>About Me</span>
               </Link>
             </motion.div>
 
             {/* Stats */}
             <motion.div {...enter(0.95)} className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto">
               <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-2">15+</div>
-                <div className="text-white/60 text-sm">Happy Clients</div>
+                <div className="text-3xl font-bold text-white mb-2">XX+</div>
+                <div className="text-white/60 text-sm">Products Designed</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-2">10+</div>
-                <div className="text-white/60 text-sm">Projects</div>
+                <div className="text-3xl font-bold text-white mb-2">XX+</div>
+                <div className="text-white/60 text-sm">Projects Shipped</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-2">24/7</div>
-                <div className="text-white/60 text-sm">Creative Support</div>
+                <div className="text-3xl font-bold text-white mb-2">UX + UI</div>
+                <div className="text-white/60 text-sm">Research to Delivery</div>
               </div>
             </motion.div>
           </div>

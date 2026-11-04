@@ -1,32 +1,31 @@
 import { useState, useEffect } from 'react';
-import { projects as staticProjects } from '../data/projects';
+import { projects as snapshot } from '../data/projects';
+import { supabase } from '../lib/supabase';
+import { listPublished } from '../lib/projects';
 
 export const useProjects = () => {
-  const [projects, setProjects] = useState(staticProjects);
-
+  const [projects, setProjects] = useState(supabase ? [] : snapshot);
   useEffect(() => {
-    // Load from localStorage on mount
-    const saved = localStorage.getItem('portfolio_projects');
-    if (saved) {
+    if (!supabase) return;
+    let active = true;
+    const refresh = async () => {
       try {
-        setProjects(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse projects from localStorage", e);
-        setProjects(staticProjects);
-      }
-    }
-  }, []);
-
-  // Listen for changes (e.g. if edited in another tab or updated in current)
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'portfolio_projects') {
-        setProjects(JSON.parse(e.newValue));
+        const rows = await listPublished();
+        if (active) setProjects(rows.map(row => ({ ...row.content, id: row.id })));
+      } catch (error) {
+        // Only use the bundled snapshot on an actual outage, never an empty result.
+        console.error('Could not load published projects', error);
+        if (active) setProjects(snapshot);
       }
     };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    refresh();
+    window.addEventListener('focus', refresh);
+    window.addEventListener('portfolio-published', refresh);
+    return () => {
+      active = false;
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('portfolio-published', refresh);
+    };
   }, []);
-
   return projects;
 };

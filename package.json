@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test": "node --experimental-vm-modules --test tests/projects.test.mjs tests/carousel.test.mjs",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
@@ -12,6 +13,7 @@
   "dependencies": {
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
+    "@supabase/supabase-js": "^2.118.0",
     "framer-motion": "^11.0.0",
     "gsap": "^3.15.0",
     "lucide-react": "^0.344.0",

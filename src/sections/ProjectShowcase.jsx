@@ -1,3 +1,4 @@
+import { mediaUrl } from '../utils/projectMedia';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useProjects } from '../hooks/useProjects';
@@ -10,19 +11,19 @@ const ProjectCard = ({ project }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className={`relative group overflow-hidden rounded-[32px] ${isLarge ? 'col-span-2 aspect-[16/9]' : 'col-span-1 aspect-square'}`}
+      className={`relative group overflow-hidden rounded-[32px] bg-white/[0.04] ${isLarge ? 'col-span-2 aspect-[16/9]' : 'col-span-1 aspect-square'}`}
     >
       <Link to={`/project/${project.id}`}>
-        <img 
-          src={`${import.meta.env.BASE_URL}${(project.thumbnail || project.img || '').replace(/^\//, '')}`} 
-          alt={project.title} 
+        {!project.hideCardImage && <img
+          src={mediaUrl(project.thumbnail || project.img)}
+          alt={project.thumbnailAlt || project.title}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
+        />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
         
         <div className="absolute bottom-8 left-8 right-8 flex flex-col items-start">
-          <h3 className="font-bebas text-3xl lg:text-5xl tracking-widest text-white mb-2">{project.title}</h3>
-          <p className="text-white/40 font-mono text-[10px] uppercase tracking-[0.2em]">{project.sub}</p>
+          {!project.hideCardTitle && <h3 className="font-bebas text-3xl lg:text-5xl tracking-widest text-white mb-2">{project.title}</h3>}
+          {!project.hideCardSubtitle && <p className="text-white/40 font-mono text-[10px] uppercase tracking-[0.2em]">{project.sub}</p>}
         </div>
 
         {/* Hover Overlay Icon */}
@@ -36,7 +37,7 @@ const ProjectCard = ({ project }) => {
 
 const ProjectShowcase = () => {
   const projects = useProjects();
-  const featuredProjects = projects.slice(0, 3);
+  const featuredProjects = projects.filter(project => project.featured !== false).slice(0, 3);
 
   return (
     <section id="work" className="py-40 px-14 max-w-7xl mx-auto relative z-10">

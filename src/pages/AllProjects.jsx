@@ -1,3 +1,4 @@
+import { mediaUrl } from '../utils/projectMedia';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useProjects } from '../hooks/useProjects';
@@ -9,19 +10,19 @@ const ProjectCard = ({ project }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative group overflow-hidden rounded-[32px] aspect-square"
+      className="relative group overflow-hidden rounded-[32px] bg-white/[0.04] aspect-square"
     >
       <Link to={`/project/${project.id}`}>
-        <img 
-          src={`${import.meta.env.BASE_URL}${(project.thumbnail || project.img || '').replace(/^\//, '')}`} 
-          alt={project.title} 
+        {!project.hideCardImage && <img
+          src={mediaUrl(project.thumbnail || project.img)}
+          alt={project.thumbnailAlt || project.title}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
+        />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
         
         <div className="absolute bottom-8 left-8 right-8 flex flex-col items-start">
-          <h3 className="font-bebas text-3xl lg:text-4xl tracking-widest text-white mb-2">{project.title}</h3>
-          <p className="text-white/40 font-mono text-[9px] uppercase tracking-[0.2em]">{project.sub}</p>
+          {!project.hideCardTitle && <h3 className="font-bebas text-3xl lg:text-4xl tracking-widest text-white mb-2">{project.title}</h3>}
+          {!project.hideCardSubtitle && <p className="text-white/40 font-mono text-[9px] uppercase tracking-[0.2em]">{project.sub}</p>}
         </div>
 
         <div className="absolute top-8 right-8 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-[-10px] group-hover:translate-y-0">

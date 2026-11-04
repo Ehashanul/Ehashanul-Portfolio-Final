@@ -2,6 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
+.craft-section { overflow-x: clip; overflow-y: visible; scroll-margin-top: 110px; }
+.craft-stage { height: clamp(460px, 48vw, 680px); width: 100%; position: relative; margin: 48px 0 64px; isolation: isolate; touch-action: pan-y; }
+.craft-stage:focus-visible { outline: 1px solid #ffffff55; outline-offset: -4px; }
+.craft-stage::before { content: ''; position: absolute; inset: 5% 12%; background: radial-gradient(ellipse, #b7bdcf0a, transparent 65%); pointer-events: none; }
+.craft-edge { position: absolute; inset-block: 0; width: 10%; pointer-events: none; }
+.craft-edge-left { left: 0; background: linear-gradient(90deg, #000, transparent); }
+.craft-edge-right { right: 0; background: linear-gradient(-90deg, #000, transparent); }
+.craft-control { display: inline-flex; justify-content: center; align-items: center; width: 44px; height: 44px; border: 1px solid #ffffff26; background: #ffffff06; border-radius: 50%; color: #ffffffa6; transition: background 200ms, color 200ms; }
+.craft-control:hover { background: #ffffff16; color: white; }
+.craft-control:focus-visible { outline: 2px solid #d4d9e5; outline-offset: 4px; }
+.craft-pagination { display: flex; justify-content: center; margin-top: 24px; }
+.craft-pagination button { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; }
+.craft-pagination span { width: 5px; height: 5px; border-radius: 99px; background: #ffffff40; transition: width 250ms, background 250ms; }
+.craft-pagination button[aria-pressed=true] span { width: 18px; background: #e2e6ee; }
+.craft-pagination button:focus-visible { outline: 1px solid white; }
+.craft-static-card { padding: 30px; border: 1px solid #ffffff1f; border-radius: 24px; background: linear-gradient(140deg, #24262c, #101114); }
+
+.admin-shell { position: relative; z-index: 10; max-width: 1280px; margin: auto; padding: 150px 24px 80px; }
+.admin-shell h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600; letter-spacing: -0.04em; margin-bottom: 12px; }
+.admin-shell h2 { font-size: 1.4rem; font-weight: 600; margin: 12px 0; }
+.admin-shell p { line-height: 1.7; }
+.admin-panel { padding: 28px; border: 1px solid #ffffff14; border-radius: 24px; background: linear-gradient(135deg, #ffffff09, #ffffff02); }
+.admin-panel > p { color: #ffffff80; margin-bottom: 20px; }
+.admin-eyebrow { font: 10px monospace; text-transform: uppercase; letter-spacing: 0.18em; color: #ffffff65; }
+.admin-shell label { font-size: 13px; color: #ffffffb3; }
+.admin-shell input:not([type=checkbox]):not([type=file]), .admin-shell textarea, .admin-shell select { display: block; width: 100%; border: 1px solid #ffffff26; border-radius: 12px; background: #141416; padding: 12px 14px; margin-top: 8px; color: white; }
+.admin-shell :focus-visible { outline: 2px solid #d6dce8; outline-offset: 3px; }
+.admin-button { display: inline-flex; gap: 8px; align-items: center; justify-content: center; padding: 11px 16px; border: 1px solid #ffffff26; background: #ffffff08; border-radius: 999px; font-size: 12px; color: white; }
+.admin-button:hover { background: #ffffff16; }
+.admin-primary { background: #e9ecf2; color: #101114; font-weight: 600; }
+.admin-primary:hover { background: white; }
+.admin-shell button:disabled, .admin-shell fieldset:disabled { opacity: 0.5; }
+.admin-toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 28px; flex-wrap: wrap; }
+.admin-toolbar input { flex: 1; min-width: 180px; }
+.admin-toolbar select { max-width: 170px; }
+.admin-error, .admin-success { padding: 14px 18px; border-radius: 12px; margin: 16px 0; font-size: 13px; }
+.admin-error { background: #7f1d1d40; color: #fecaca; border: 1px solid #f8717133; }
+.admin-success { background: #ffffff0a; border: 1px solid #ffffff26; color: #e5e7eb; }
+.admin-editor-overlay { position: fixed; inset: 0; z-index: 700; background: #000b; backdrop-filter: blur(10px); display: flex; justify-content: flex-end; }
+.admin-editor { width: 100%; max-width: 840px; overflow-y: auto; overscroll-behavior: contain; padding: clamp(20px, 4vw, 48px); background: #0c0c0f; border-left: 1px solid #ffffff26; }
+.admin-image-field { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px dashed #ffffff26; border-radius: 16px; }
+.admin-image-field img { width: 100%; height: 150px; object-fit: contain; border-radius: 10px; background: #ffffff05; }
+
 /* A short, staggered entrance without delaying page interaction. */
 .site-nav-enter {
   animation: nav-enter 650ms cubic-bezier(0.22, 1, 0.36, 1) 80ms backwards;

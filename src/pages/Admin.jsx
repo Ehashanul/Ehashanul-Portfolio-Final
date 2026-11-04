@@ -1,346 +1,166 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Save, Trash2, Download, LogIn, ExternalLink, Image as ImageIcon, RotateCcw } from 'lucide-react';
-import GlassCard from '../components/GlassCard';
-import { projects as initialProjects } from '../data/projects';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Plus, ArrowLeft, LogOut, Upload, Download } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { listDrafts, listPublished, saveDraft, publishDraft, unpublishProject, trashProject, uploadImage, previewImage } from '../lib/projects';
+import { projects as starterProjects } from '../data/projects';
+import { mediaUrl } from '../utils/projectMedia';
+import ProjectContentEditor from '../components/ProjectContentEditor';
+import ProjectContent from '../components/ProjectContent';
 
-const Admin = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [password, setPassword] = useState('');
-  const [projects, setProjects] = useState([]);
-  const [editingProject, setEditingProject] = useState(null);
-  const [showToast, setShowToast] = useState(false);
+const emptyProject = () => ({ id: `project-${crypto.randomUUID()}`, content: { title: '', sub: '', platform: 'Web', role: '', studio: '', duration: '', emoji: '', size: 'small', thumbnail: '', heroImage: '', gallery: [], problem: '', goal: '', process: [], outcome: '', featured: false, sortOrder: 0 } });
 
-  // Load projects from localStorage or use initial data
+function PreviewImage({ path, title }) {
+  const [url, setUrl] = useState('');
   useEffect(() => {
-    const saved = localStorage.getItem('portfolio_projects');
-    if (saved) {
-      setProjects(JSON.parse(saved));
-    } else {
-      setProjects(initialProjects);
-    }
+    let active = true;
+    previewImage(path).then(value => { if (active) setUrl(mediaUrl(value)); }).catch(() => {});
+    return () => { active = false; };
+  }, [path]);
+  return url ? <img src={url} alt={title} className="w-full rounded-2xl object-contain max-h-96" /> : null;
+}
+
+function ImageField({ label, value, onChange, onBusy, onError }) {
+  const [preview, setPreview] = useState('');
+  useEffect(() => {
+    let active = true;
+    setPreview('');
+    previewImage(value).then(url => { if (active) setPreview(mediaUrl(url)); }).catch(onError);
+    return () => { active = false; };
+  }, [value]);
+  return <div className="admin-image-field">
+    <span>{label}</span>
+    {preview && <img src={preview} alt={label} />}
+    <label className="admin-button"><Upload size={14} /> Upload image
+      <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={async event => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        onBusy(true);
+        try { onChange(await uploadImage(file)); } catch (error) { onError(error); } finally { onBusy(false); event.target.value = ''; }
+      }} />
+    </label>
+    {value && <button type="button" className="text-xs text-white/50" onClick={() => onChange('')}>Remove from project</button>}
+  </div>;
+}
+
+export default function Admin() {
+  const [session, setSession] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [allowed, setAllowed] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rows, setRows] = useState([]);
+  const [published, setPublished] = useState([]);
+  const [editor, setEditor] = useState(null);
+  const [dirty, setDirty] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [uploads, setUploads] = useState(0);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [filter, setFilter] = useState('active');
+  const [search, setSearch] = useState('');
+  const [preview, setPreview] = useState(false);
+  const fail = error => setError(error.message || String(error));
+  const refresh = async () => {
+    const [drafts, live] = await Promise.all([listDrafts(), listPublished()]);
+    setRows(drafts); setPublished(live.map(row => row.id));
+    return drafts;
+  };
+  const run = async task => {
+    setBusy(true); setError(''); setMessage('');
+    try { await task(); } catch (error) { fail(error); } finally { setBusy(false); }
+  };
+
+  useEffect(() => {
+    if (!supabase) return;
+    let active = true;
+    const update = next => { if (active) { setSession(next); setAllowed(false); setAuthReady(!next); } };
+    supabase.auth.getSession().then(({ data, error }) => { if (error) { fail(error); setAuthReady(true); } else update(data.session); });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, next) => update(next));
+    return () => { active = false; subscription.unsubscribe(); };
   }, []);
 
-  const saveProjects = (newProjects) => {
-    setProjects(newProjects);
-    localStorage.setItem('portfolio_projects', JSON.stringify(newProjects));
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+  useEffect(() => {
+    if (!session) return;
+    let active = true;
+    (async () => {
+      try {
+        const { data, error } = await supabase.rpc('is_portfolio_admin');
+        if (error) throw error;
+        if (!data) throw new Error('Your account is not authorized to manage this portfolio.');
+        if (active) { setAllowed(true); await refresh(); }
+      } catch (error) { if (active) fail(error); }
+      finally { if (active) setAuthReady(true); }
+    })();
+    return () => { active = false; };
+  }, [session]);
+
+  useEffect(() => {
+    const warn = event => { if (dirty || uploads) { event.preventDefault(); event.returnValue = ''; } };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty, uploads]);
+
+  useEffect(() => {
+    if (!editor) return;
+    const previous = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.querySelector('.admin-editor button')?.focus();
+    return () => { document.body.style.overflow = overflow; previous?.focus(); };
+  }, [Boolean(editor)]);
+
+  const change = (field, value) => { setEditor(current => ({ ...current, content: { ...current.content, [field]: value } })); setDirty(true); };
+  const close = () => {
+    if (uploads || busy) return;
+    if (dirty && !window.confirm('Discard your unsaved changes?')) return;
+    setEditor(null); setDirty(false); setPreview(false);
+  };
+  const announce = text => { setMessage(text); window.dispatchEvent(new Event('portfolio-published')); };
+  const save = async publish => {
+    const saved = await saveDraft(editor);
+    setEditor(saved); setDirty(false);
+    if (publish) await publishDraft(saved);
+    const refreshed = await refresh();
+    setEditor(refreshed.find(row => row.id === saved.id) || saved);
+    announce(publish ? 'Project published. Visitors will see this version on their next page load.' : 'Draft saved. The published version is unchanged.');
+  };
+  const download = (name, data) => {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+    const link = document.createElement('a'); link.href = url; link.download = name; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  const handleReset = () => {
-    if (window.confirm('Reset all projects to default? All custom changes will be lost.')) {
-      saveProjects(initialProjects);
-    }
-  };
+  if (!supabase) return <main className="admin-shell"><section className="admin-panel max-w-xl mx-auto"><p className="admin-eyebrow">Portfolio studio</p><h1>Connect your cloud workspace</h1><p>The dashboard is ready for Supabase. Follow <code>docs/SUPABASE_SETUP.md</code>, add the two public settings from <code>.env.example</code> to <code>.env.local</code>, then restart Vite.</p><p>Your existing portfolio remains available until the cloud connection is configured.</p><Link to="/" className="admin-button">Back to portfolio</Link></section></main>;
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (password === 'admin123') { // Simple mock password
-      setIsLoggedIn(true);
-    } else {
-      alert('Incorrect password');
-    }
-  };
+  const notice = <div aria-live="polite">{error && <p role="alert" className="admin-error">{error}</p>}{message && <p className="admin-success">{message}</p>}</div>;
+  if (!authReady) return <main className="admin-shell"><p role="status">Opening your workspace…</p></main>;
+  if (!session || !allowed) return <main className="admin-shell"><section className="admin-panel max-w-md mx-auto"><p className="admin-eyebrow">Private workspace</p><h1>Portfolio studio</h1><p>Sign in with your authorized admin account.</p>{notice}{session ? <button className="admin-button" onClick={() => run(async () => { await supabase.auth.signOut(); })}>Sign out</button> : <form className="space-y-5" onSubmit={event => { event.preventDefault(); run(async () => { const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) throw error; setPassword(''); }); }}>
+    <label>Email<input required type="email" autoComplete="username" value={email} onChange={event => setEmail(event.target.value)} /></label>
+    <label>Password<input required type="password" autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} /></label>
+    <button disabled={busy} className="admin-button admin-primary">{busy ? 'Signing in…' : 'Sign in'}</button>
+    <p className="text-xs text-white/40">Accounts are created by the portfolio owner. Public registration is disabled.</p>
+  </form>}</section></main>;
 
-  const addProject = () => {
-    const newProj = {
-      id: `proj-${Date.now()}`,
-      title: 'New Project',
-      sub: 'Sub Title',
-      thumbnail: '/project-1.png',
-      heroImage: '/project-1-wide.png',
-      gallery: ['', '', ''],
-      size: 'small',
-      platform: 'Web',
-      emoji: '✨',
-      problem: '',
-      goal: '',
-      process: ['Research', 'Design', 'Develop'],
-      outcome: '',
-      role: 'Designer',
-      studio: 'Independent',
-      duration: '1 Month'
-    };
-    setEditingProject(newProj);
-  };
-
-  const deleteProject = (id) => {
-    if (window.confirm('Are you sure you want to delete this project?')) {
-      saveProjects(projects.filter(p => p.id !== id));
-    }
-  };
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    const exists = projects.find(p => p.id === editingProject.id);
-    let newProjects;
-    if (exists) {
-      newProjects = projects.map(p => p.id === editingProject.id ? editingProject : p);
-    } else {
-      newProjects = [...projects, editingProject];
-    }
-    saveProjects(newProjects);
-    setEditingProject(null);
-  };
-
-  const exportData = () => {
-    const dataStr = "export const projects = " + JSON.stringify(projects, null, 2) + ";";
-    const blob = new Blob([dataStr], { type: 'text/javascript' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'projects.js';
-    link.click();
-  };
-
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-6">
-        <GlassCard className="w-full max-w-md p-10 rounded-[40px] border-white/10">
-          <div className="mb-10 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-p400/20 flex items-center justify-center mx-auto mb-6 text-p300">
-              <LogIn className="w-8 h-8" />
-            </div>
-            <h1 className="font-bebas text-4xl tracking-widest text-white mb-2">RESTRICTED ACCESS</h1>
-            <p className="text-white/40 font-mono text-[10px] uppercase tracking-widest">Portfolio Control Center</p>
-          </div>
-          <form onSubmit={handleLogin} className="space-y-6">
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter Access Key"
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white outline-none focus:border-p400/50 transition-all placeholder:text-white/20"
-            />
-            <button className="w-full py-4 rounded-2xl bg-white text-black font-semibold text-sm tracking-widest uppercase hover:bg-p300 hover:text-white transition-all">
-              Unlock Console
-            </button>
-          </form>
-        </GlassCard>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen pt-32 pb-24 px-14 max-w-7xl mx-auto relative z-10">
-      
-      <AnimatePresence>
-        {showToast && (
-          <motion.div 
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-28 left-1/2 -translate-x-1/2 z-[1000] px-8 py-4 rounded-full bg-white text-black font-mono text-[11px] font-bold uppercase tracking-widest shadow-[0_20px_50px_rgba(255,255,255,0.2)] flex items-center gap-3"
-          >
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            Project Database Synchronized
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-16 gap-8">
-        <div>
-          <div className="flex items-center gap-4 text-p300 font-mono text-[10.5px] uppercase tracking-widest mb-4">
-            <div className="w-7 h-px bg-p300 shadow-[0_0_8px_#a78bfa]" />
-            Dashboard
-          </div>
-          <h1 className="font-bebas text-7xl lg:text-8xl tracking-wider">
-            PROJECT <span className="bg-grd-accent bg-clip-text text-transparent">MANAGER</span>
-          </h1>
-        </div>
-        <div className="flex flex-wrap gap-4">
-          <button onClick={handleReset} className="btn-secondary py-3 px-6 rounded-2xl flex items-center gap-2 text-white/40 hover:text-red-400 transition-colors">
-            <RotateCcw className="w-4 h-4" /> Reset
-          </button>
-          <button onClick={exportData} className="btn-secondary py-3 px-6 rounded-2xl flex items-center gap-2">
-            <Download className="w-4 h-4" /> Export Data
-          </button>
-          <button onClick={addProject} className="btn-primary py-3 px-6 rounded-2xl flex items-center gap-2 bg-p400 text-white hover:bg-p500">
-            <Plus className="w-4 h-4" /> Add Project
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((proj) => (
-          <GlassCard key={proj.id} className="p-8 rounded-[32px] border-white/5 group hover:border-p400/30 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-10 text-6xl group-hover:opacity-20 transition-opacity">{proj.emoji}</div>
-            <h3 className="font-bebas text-3xl tracking-wider mb-2 text-white/90">{proj.title}</h3>
-            <p className="text-white/40 font-mono text-[10px] uppercase tracking-widest mb-8">{proj.sub}</p>
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setEditingProject(proj)}
-                className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-mono uppercase tracking-widest hover:bg-white/10 transition-all"
-              >
-                Edit
-              </button>
-              <button 
-                onClick={() => deleteProject(proj.id)}
-                className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </GlassCard>
-        ))}
-      </div>
-
-      <AnimatePresence>
-        {editingProject && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[600] flex items-center justify-end bg-black/80 backdrop-blur-sm"
-          >
-            <motion.div 
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              className="w-full max-w-2xl h-full bg-ink border-l border-white/10 p-12 overflow-y-auto"
-            >
-              <div className="flex justify-between items-center mb-12">
-                <h2 className="font-bebas text-5xl tracking-widest text-white">Project Editor</h2>
-                <button onClick={() => setEditingProject(null)} className="text-white/40 hover:text-white uppercase font-mono text-[10px] tracking-widest">Close</button>
-              </div>
-
-              <form onSubmit={handleSave} className="space-y-8">
-                {/* Basic Info */}
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Project Title</label>
-                    <input 
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-p400"
-                      value={editingProject.title}
-                      onChange={(e) => setEditingProject({...editingProject, title: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Subtitle</label>
-                    <input 
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-p400"
-                      value={editingProject.sub}
-                      onChange={(e) => setEditingProject({...editingProject, sub: e.target.value})}
-                    />
-                  </div>
-                </div>
-
-                {/* Images Section */}
-                <div className="space-y-6 bg-white/[0.02] p-8 rounded-3xl border border-white/5">
-                  <h3 className="font-mono text-[10px] text-p300 uppercase tracking-widest mb-4">Project Imagery (5 Images)</h3>
-                  
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Thumbnail (Home/Gallery)</label>
-                      <input 
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-p400"
-                        value={editingProject.thumbnail}
-                        onChange={(e) => setEditingProject({...editingProject, thumbnail: e.target.value})}
-                        placeholder="/project-1.png"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Hero Image (Wide Header)</label>
-                      <input 
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-p400"
-                        value={editingProject.heroImage}
-                        onChange={(e) => setEditingProject({...editingProject, heroImage: e.target.value})}
-                        placeholder="/project-1-wide.png"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                       {[0, 1, 2].map((i) => (
-                         <div key={i} className="space-y-2">
-                           <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Gallery Image {i+1}</label>
-                           <input 
-                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs outline-none focus:border-p400"
-                             value={editingProject.gallery?.[i] || ''}
-                             onChange={(e) => {
-                               const newGallery = [...(editingProject.gallery || ['', '', ''])];
-                               newGallery[i] = e.target.value;
-                               setEditingProject({...editingProject, gallery: newGallery});
-                             }}
-                             placeholder={`/gallery-${i+1}.png`}
-                           />
-                         </div>
-                       ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Platform</label>
-                    <input 
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-p400"
-                      value={editingProject.platform}
-                      onChange={(e) => setEditingProject({...editingProject, platform: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Emoji Icon</label>
-                    <input 
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-p400"
-                      value={editingProject.emoji}
-                      onChange={(e) => setEditingProject({...editingProject, emoji: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Layout Size</label>
-                    <select 
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-p400 appearance-none"
-                      value={editingProject.size}
-                      onChange={(e) => setEditingProject({...editingProject, size: e.target.value})}
-                    >
-                      <option value="small">Small (Square)</option>
-                      <option value="large">Large (Wide)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">The Problem</label>
-                  <textarea 
-                    rows="3"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-p400 resize-none"
-                    value={editingProject.problem}
-                    onChange={(e) => setEditingProject({...editingProject, problem: e.target.value})}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">The Goal</label>
-                  <textarea 
-                    rows="3"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-p400 resize-none"
-                    value={editingProject.goal}
-                    onChange={(e) => setEditingProject({...editingProject, goal: e.target.value})}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Outcome & Impact</label>
-                  <textarea 
-                    rows="2"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-p400 resize-none italic"
-                    value={editingProject.outcome}
-                    onChange={(e) => setEditingProject({...editingProject, outcome: e.target.value})}
-                  />
-                </div>
-
-                <div className="pt-8">
-                  <button className="w-full py-5 rounded-[24px] bg-white text-black font-semibold text-sm tracking-widest uppercase flex items-center justify-center gap-3 hover:bg-p300 hover:text-white transition-all">
-                    <Save className="w-4 h-4" /> Save Project Changes
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-export default Admin;
+  const visible = rows.filter(row => Boolean(row.deleted_at) === (filter === 'trash') && row.content.title.toLowerCase().includes(search.toLowerCase()));
+  return <main className="admin-shell">
+    <header className="flex flex-wrap items-end justify-between gap-6 mb-8"><div><p className="admin-eyebrow">Your creative workspace</p><h1>Portfolio studio</h1><p className="text-white/50">{rows.filter(row => !row.deleted_at).length} projects · {published.length} published</p></div><div className="flex flex-wrap gap-3"><Link className="admin-button" to="/"><ArrowLeft size={16} /> Portfolio</Link><button className="admin-button" disabled={busy} onClick={() => run(async () => { const { error } = await supabase.auth.signOut(); if (error) throw error; setRows([]); setEditor(null); })}><LogOut size={16} /> Sign out</button></div></header>
+    {notice}
+    <div className="admin-toolbar"><input aria-label="Search projects" placeholder="Search projects…" value={search} onChange={event => setSearch(event.target.value)} /><select aria-label="Project status" value={filter} onChange={event => setFilter(event.target.value)}><option value="active">Active projects</option><option value="trash">Trash</option></select><button className="admin-button" onClick={() => run(async () => { download('portfolio-content-backup.json', { version: 1, exportedAt: new Date().toISOString(), drafts: await listDrafts(), published: await listPublished() }); announce('Content exported. Back up Storage files separately.'); })}><Download size={16} /> Export</button><button className="admin-button admin-primary" onClick={() => { setEditor(emptyProject()); setDirty(false); }}><Plus size={16} /> New project</button></div>
+    {!rows.length && <section className="admin-panel mb-8"><h2>Start with your current portfolio</h2><p>Import the bundled projects as private drafts. Review each one before publishing.</p><button className="admin-button" disabled={busy} onClick={() => run(async () => { for (const [index, project] of starterProjects.entries()) { await saveDraft({ id: project.id, content: { ...project, featured: true, sortOrder: index } }); } await refresh(); announce('Starter projects imported as drafts.'); })}>Import existing projects</button></section>}
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{visible.map(row => <article className="admin-panel" key={row.id}><div className="flex items-center justify-between gap-3"><span className="admin-eyebrow">{row.deleted_at ? 'In trash' : published.includes(row.id) ? 'Published + editable draft' : 'Draft'}</span>{row.content.featured && <span className="text-xs text-white/40">Featured</span>}</div><h2>{row.content.title}</h2><p>{row.content.sub || 'Add a subtitle'}</p><div className="flex flex-wrap gap-3 mt-6">{row.deleted_at ? <button disabled={busy} className="admin-button" onClick={() => run(async () => { await trashProject(row.id, true); await refresh(); announce('Restored as a draft.'); })}>Restore draft</button> : <><button className="admin-button" onClick={() => { setEditor(structuredClone(row)); setDirty(false); }}>Edit project</button><button disabled={busy} className="admin-button" onClick={() => { if (window.confirm(`Move “${row.content.title}” to trash and remove it from the public portfolio?`)) run(async () => { await trashProject(row.id); await refresh(); announce('Project moved to trash.'); }); }}>Trash</button></>}</div></article>)}</div>
+    {!visible.length && rows.length > 0 && <p className="py-12 text-white/40">No projects match this view.</p>}
+    {editor && <div className="admin-editor-overlay"><section role="dialog" aria-modal="true" aria-labelledby="project-editor-title" className="admin-editor" onKeyDown={event => { if (event.key === 'Escape') close(); if (event.key === 'Tab') { const items = [...event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href]')].filter(node => node.getClientRects().length); const first = items[0]; const last = items[items.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); } } }}><div className="flex justify-between items-center gap-4"><div><p className="admin-eyebrow">{dirty ? 'Unsaved changes' : 'Project editor'}</p><h2 id="project-editor-title">{editor.content.title || 'New project'}</h2></div><button className="admin-button" disabled={busy || uploads > 0} onClick={close}>Close</button></div>{notice}<button type="button" className="admin-button mt-4" onClick={() => setPreview(value => !value)}>{preview ? 'Back to editing' : 'Preview draft'}</button>{preview && <article className="admin-panel mt-6 space-y-6"><p className="admin-eyebrow">Private draft preview</p><h1>{editor.content.title}</h1><p>{editor.content.sub}</p>{!editor.content.hideHero && <PreviewImage path={editor.content.heroImage} title={editor.content.title} />}{!editor.content.hideMetadata && <p>{editor.content.role} · {editor.content.studio} · {editor.content.duration}</p>}<ProjectContent project={editor.content} preview /></article>}<form hidden={preview} onSubmit={event => { event.preventDefault(); run(() => save(false)); }}>
+      <fieldset disabled={busy || uploads > 0} className="space-y-6 mt-6">
+      <div className="grid sm:grid-cols-2 gap-5">{[['title','Project title'],['sub','Subtitle'],['platform','Platform'],['role','Your role'],['studio','Studio / client'],['duration','Duration']].map(([field,label]) => <label key={field}>{label}<input required={field === 'title'} maxLength={200} value={editor.content[field] || ''} onChange={event => change(field,event.target.value)} /></label>)}</div>
+      <div className="grid sm:grid-cols-2 gap-5"><label>Layout<select value={editor.content.size} onChange={event => change('size',event.target.value)}><option value="small">Square</option><option value="large">Wide</option></select></label><label>Display order<input type="number" min="0" max="10000" value={editor.content.sortOrder ?? 0} onChange={event => change('sortOrder',Number(event.target.value))} /></label></div>
+      <label className="flex items-center gap-3"><input type="checkbox" checked={Boolean(editor.content.featured)} onChange={event => change('featured',event.target.checked)} /> Feature on homepage</label>
+      <div className="grid sm:grid-cols-2 gap-5">{[['thumbnail','Thumbnail'],['heroImage','Hero image']].map(([field,label]) => <ImageField key={field} label={label} value={editor.content[field]} onChange={value => change(field,value)} onBusy={value => setUploads(count => count + (value ? 1 : -1))} onError={fail} />)}</div>
+      <h3>Gallery</h3><div className="grid sm:grid-cols-2 gap-5">{(editor.content.gallery || []).map((value,index) => <div key={index}><ImageField label={`Image ${index + 1}`} value={value} onChange={next => change('gallery',editor.content.gallery.map((old,i) => i === index ? next : old))} onBusy={value => setUploads(count => count + (value ? 1 : -1))} onError={fail} /><button type="button" className="admin-button mt-2" onClick={() => change('gallery',editor.content.gallery.filter((_item,i) => i !== index))}>Remove slot</button></div>)}</div><button type="button" className="admin-button" onClick={() => change('gallery',[...(editor.content.gallery || []),''])}>Add gallery image</button>
+      {!Array.isArray(editor.content.sections) && ['problem','goal','outcome'].map(field => <label key={field} className="block capitalize">{field}<textarea rows={5} maxLength={20000} value={editor.content[field] || ''} onChange={event => change(field,event.target.value)} /></label>)}
+      <label className="block">Process steps (one per line)<textarea rows={4} value={(editor.content.process || []).join('\n')} onChange={event => change('process',event.target.value.split('\n'))} /></label>
+      <ProjectContentEditor content={editor.content} change={change} ImageField={ImageField} onBusy={value => setUploads(count => count + (value ? 1 : -1))} onError={fail} /><div className="flex flex-wrap gap-3 pt-4"><button className="admin-button" type="submit">Save draft</button><button className="admin-button admin-primary" type="button" onClick={() => run(() => save(true))}>Save & publish</button>{published.includes(editor.id) && <button type="button" className="admin-button" onClick={() => run(async () => { await unpublishProject(editor.id); await refresh(); announce('Project unpublished. Your draft is retained.'); })}>Unpublish</button>}</div>
+      </fieldset>{(busy || uploads > 0) && <p role="status" className="py-4 text-white/60">{uploads ? 'Optimizing and uploading image…' : 'Saving changes…'}</p>}
+    </form></section></div>}
+  </main>;
+}

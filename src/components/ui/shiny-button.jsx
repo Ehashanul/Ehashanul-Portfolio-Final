@@ -76,7 +76,7 @@ export function ShinyButton({
 
     .${scope} {
       --gleam-base: ${fillColor};
-      --gleam-inset: #1b2012;
+      --gleam-inset: #1a1a1a;
       --gleam-label: ${labelColor};
       --gleam-accent: ${accentColor};
       --gleam-accent-soft: ${accentSoftColor};

@@ -1,4 +1,4 @@
-﻿import { ToolDock, ToolDockTile } from '../components/ui/techstack';
+import { ToolDock, ToolDockTile } from '../components/ui/techstack';
 import { mediaUrl } from '../utils/projectMedia';
 
 const tools = [
@@ -16,7 +16,7 @@ const tools = [
 const items = tools.map(([label,file,href]) => ({ label, href, icon: <ToolDockTile className="bg-[#15161a]"><img src={mediaUrl(`icons/tools/${file}.svg`)} alt="" draggable={false} className="tool-brand-icon object-contain" style={['photoshop', 'illustrator', 'after-effects'].includes(file) ? { width: '76%', height: '76%' } : undefined} /></ToolDockTile> }));
 
 export default function TechStack() {
-  return <section aria-labelledby="tech-stack-title" className="relative z-10 bg-black px-6 pt-4 pb-20 md:pb-28 text-center">
+  return <section aria-labelledby="tech-stack-title" className="relative z-10 bg-black px-6 pt-2 pb-8 md:pb-10 text-center">
     <h2 id="tech-stack-title" className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45">Tools behind the craft</h2>
     <ToolDock items={items} label="Design and development tools" size={64} overlap={0.12} tilt />
   </section>;

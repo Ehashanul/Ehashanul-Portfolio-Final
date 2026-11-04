@@ -11,9 +11,9 @@ const CARDS = [
 ];
 
 export default function Expertise() {
-  return <section id="expertise" className="expertise-hover-section relative z-10 bg-black py-24 md:py-32 px-6 md:px-14">
+  return <section id="expertise" className="expertise-hover-section relative z-10 bg-black pt-14 pb-6 md:pt-20 md:pb-8 px-6 md:px-14">
     <div className="max-w-7xl mx-auto">
-      <SectionHeading number="01" label="What I do" title="Expertise &" accent="craft" description="Thoughtful design, from the first question to the final interaction." />
+      <SectionHeading title="Expertise &" accent="craft" description="Thoughtful design, from the first question to the final interaction." />
       <HoverStack cards={CARDS} />
     </div>
   </section>;

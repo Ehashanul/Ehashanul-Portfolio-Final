@@ -46,8 +46,8 @@ export default function Hero() {
               <ShinyButton
                 to="/#work"
                 label="Explore My Work"
-                accentColor="#D8FF5F"
-                accentSoftColor="#E9FFA3"
+                accentColor="#FFFFFF"
+                accentSoftColor="#E5E7EB"
                 icon={<ArrowRight aria-hidden="true" className="shrink-0 h-5 w-5" />}
               />
               <Link to="/#about" className="contact-cta" onPointerMove={trackButtonGlow}>

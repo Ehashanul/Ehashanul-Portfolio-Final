@@ -39,8 +39,8 @@ const FAQItem = ({ item, index, isOpen, onClick }) => {
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(null);
-  return <section id="faq" className="relative z-10 bg-black py-24 md:py-32 px-6 md:px-14"><div className="max-w-7xl mx-auto">
-    <SectionHeading number="03" label="A few answers" title="Asked" accent="questions" description="A little clarity on the process, the practical details, and working together." />
+  return <section id="faq" className="relative z-10 bg-black pt-8 pb-14 md:pt-10 md:pb-20 px-6 md:px-14"><div className="max-w-7xl mx-auto">
+    <SectionHeading title="Asked" accent="questions" description="A little clarity on the process, the practical details, and working together." />
     <div className="portfolio-faq-list">{FAQS.map((item, index) => <FAQItem key={item.q} item={item} index={index} isOpen={openIndex === index} onClick={() => setOpenIndex(openIndex === index ? null : index)} />)}</div>
   </div></section>;
 }

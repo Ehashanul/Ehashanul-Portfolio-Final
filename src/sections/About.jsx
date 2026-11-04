@@ -58,7 +58,7 @@ export default function About() {
     });
     return () => { alive = false; animations.forEach(animation => animation.cancel()); };
   }, [inView,reduced,interacting]);
-  return <section id="about" className="about-selection-section relative z-10 bg-black py-24 md:py-32 px-6 md:px-14">
+  return <section id="about" className="about-selection-section relative z-10 bg-black py-14 md:py-20 px-6 md:px-14">
     <div className="max-w-7xl mx-auto">
       <div className="flex flex-wrap items-center justify-between gap-5 mb-10">
         <h2 className="text-white/40 font-mono text-[10px] uppercase tracking-[0.3em]">About me</h2>

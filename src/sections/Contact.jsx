@@ -144,7 +144,7 @@ const Contact = () => {
       <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-[#1a1a1a] via-[#111]/60 to-transparent pointer-events-none z-[2]" />
 
       {/* Top Banner */}
-      <div className="relative py-20 px-14 text-center z-10">
+      <div className="relative py-12 md:py-16 px-6 md:px-14 text-center z-10">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -168,7 +168,7 @@ const Contact = () => {
       </div>
 
       {/* Bottom Form Section */}
-      <div className="relative z-10 max-w-7xl mx-auto px-14 py-24 grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-14 py-14 md:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
 
         {/* Left Column */}
         <motion.div

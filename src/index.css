@@ -50,7 +50,7 @@
 
 .tool-dock-root { container-type: inline-size; padding-inline: 8px; }
 .tool-brand-icon { width: 58%; height: 58%; }
-.portfolio-section-heading { margin-bottom: clamp(36px, 5vw, 64px); }
+.portfolio-section-heading { margin-bottom: clamp(28px, 3.5vw, 44px); }
 .portfolio-section-meta { display: flex; align-items: center; gap: 24px; margin-bottom: 28px; }
 .portfolio-section-meta > span:first-child { flex-shrink: 0; font: 9px 'Space Mono', monospace; letter-spacing: .18em; text-transform: uppercase; color: #ffffff66; }
 .portfolio-section-meta > span:last-child { height: 1px; flex: 1; background: #ffffff14; }

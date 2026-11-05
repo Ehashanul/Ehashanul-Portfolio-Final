@@ -1,23 +1,54 @@
-﻿import { mediaUrl } from '../utils/projectMedia';
-import { externalUrl } from '../utils/projectContent';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { useProjects } from '../hooks/useProjects';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
-import SectionHeading from '../components/SectionHeading';
+import { useProjects } from '../hooks/useProjects';
+import { mediaUrl } from '../utils/projectMedia';
+import './AllProjects.css';
+
+
+function ProjectCard({ project, index, reduced }) {
+  const image = !project.hideCardImage && mediaUrl(project.thumbnail || project.img || project.heroImage);
+  return <motion.article layout={!reduced} transition={{ duration: reduced ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
+    id={`project-${project.id}`} className="archive-project">
+    {!project.hideCardImage && <div className="archive-project-image">
+      {image ? <img src={image} alt={project.thumbnailAlt || (project.hideCardTitle ? '' : project.title)} loading={index < 3 ? 'eager' : 'lazy'} decoding="async" />
+        : <div className="archive-project-placeholder" aria-hidden="true"><span>{String(index + 1).padStart(2, '0')}</span></div>}
+      {!project.hideCardTitle ? <h2 className="archive-project-tab">{project.title}</h2> : <span className="archive-project-tab">{project.name || project.platform || 'Project'}</span>}
+      <span className="archive-image-visit">View project <ArrowUpRight size={15} /></span>
+    </div>}
+    <div className="archive-project-info">
+      <span className="archive-project-index">{String(index + 1).padStart(2, '0')}</span>
+      <div className="archive-project-name">
+        {project.hideCardImage && !project.hideCardTitle && <h2>{project.title}</h2>}
+        {!project.hideCardSubtitle && project.sub && <p>{project.sub}</p>}
+      </div>
+      <span className="archive-project-platform">{project.name || project.platform || 'Independent project'}</span>
+      <span className="archive-project-role">{project.role || '—'}</span>
+      <ArrowUpRight className="archive-project-arrow" size={20} aria-hidden="true" />
+    </div>
+    {project.description && <p className="archive-project-description">{project.description}</p>}
+    <Link className="archive-project-link" to={`/project/${encodeURIComponent(project.id)}`} aria-label={`View ${project.hideCardTitle ? 'project details' : project.title}`} />
+  </motion.article>;
+}
 
 export default function AllProjects() {
   const projects = useProjects();
-  return <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen pt-32 pb-24 px-6 md:px-14 max-w-7xl mx-auto relative z-10">
-    <Link to="/" className="inline-flex items-center gap-2 text-white/45 hover:text-white mb-12 font-mono text-[10px] uppercase tracking-widest"><ArrowLeft size={16} /> Back to home</Link>
-    <SectionHeading title="All" accent="projects" />
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">{projects.map(project => {
-      const url = externalUrl(project.liveUrl);
-      return <article key={project.id} id={`project-${project.id}`} className="group scroll-mt-32">
-        {!project.hideCardImage && <div className="aspect-[4/3] overflow-hidden rounded-3xl border border-white/10 bg-white/[0.025]">{(project.thumbnail || project.img || project.heroImage) && <img src={mediaUrl(project.thumbnail || project.img || project.heroImage)} alt={project.thumbnailAlt || project.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.025]" />}</div>}
-        <div className="flex items-start justify-between gap-5 mt-5"><div className="min-w-0 break-words">{(project.name || project.platform) && <p className="font-mono text-[10px] text-white/45 uppercase tracking-[0.16em] mb-3">{project.name || project.platform}</p>}{!project.hideCardTitle && <h2 className="text-2xl md:text-3xl font-medium tracking-tight">{project.title}</h2>}{!project.hideCardSubtitle && project.sub && <p className="mt-2 text-sm text-white/70 leading-relaxed">{project.sub}</p>}{project.description && <p className="mt-3 text-sm text-white/45 leading-relaxed whitespace-pre-line">{project.description}</p>}</div>{url && <a href={url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${project.title} (opens in a new tab)`} className="inline-flex items-center gap-2 shrink-0 text-xs text-white/65 hover:text-white border border-white/20 rounded-full px-4 py-3">Visit <ArrowUpRight size={16} /></a>}</div>
-      </article>;
-    })}</div>
-    {!projects.length && <p className="py-16 text-white/50">Projects will appear here when published.</p>}
+  const reduced = useReducedMotion();
+
+  return <motion.main className="project-archive" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <header className="archive-header">
+      <Link to="/" className="archive-back"><ArrowLeft size={14} /> Back to home</Link>
+      <div className="archive-intro">
+        <h1>All <span>projects</span><sup>({String(projects.length).padStart(2, '0')})</sup></h1>
+        <p>A collection of interfaces, experiences, and ideas brought to life. Each project, a different problem to make simpler.</p>
+      </div>
+    </header>
+    <section aria-label="Project collection">
+      <div className="archive-collection archive-gallery">
+        {projects.map((project, index) => <ProjectCard key={project.id} project={project} index={index} reduced={reduced} />)}
+      </div>
+      {!projects.length && <div className="archive-empty"><h2>Good work is on its way.</h2><p>Projects will appear here when published.</p></div>}
+      <div className="archive-end"><span>Thoughtful design. Every detail.</span><Link to="/#contact">Have something in mind? <ArrowUpRight size={16} /></Link></div>
+    </section>
   </motion.main>;
 }

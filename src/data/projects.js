@@ -1,59 +1,11 @@
+﻿import { populateCaseStudy } from './caseStudyCopy';
+const media = 'https://dnumpgumzkkodkhhyfqp.supabase.co/storage/v1/object/public/project-media';
+const section = (id, heading, body) => ({ id, type: 'text', heading, body });
+const concept = (id, title, headline, summary, challenge, direction) => ({ id, title, sub: headline, headline, summary, description: summary, platform: 'Mobile app', featured: true, thumbnail: `/project-covers/${id}.svg`, heroImage: `/project-covers/${id}.svg`, thumbnailAlt: `${title} project cover`, heroCaption: 'Project cover / Visual direction', deliverables: ['Interface design', 'Visual direction'], sections: [section('overview', 'About the direction', summary), section('challenge', 'The design challenge', challenge), section('direction', 'A focused experience', direction)] });
 export const projects = [
-  {
-    id: 'unblur',
-    featured: true,
-    title: 'Tom Ford',
-    sub: 'Ombre Leather',
-    thumbnail: '/project-1.png',
-    heroImage: '/unblur3.png',
-    gallery: ['/unblur2.png', '/Rectangle 3.png', '/project-1.png'],
-    size: 'large',
-    platform: 'iOS',
-    emoji: '📷',
-    problem: 'Most users end up with blurry, unusable photos taken in motion or low-light. Existing sharpening tools were either desktop-only, destructive, or required technical expertise.',
-    goal: 'Design a one-tap, feel-good iOS experience that uses on-device AI to restore photo sharpness — fast, intuitive, and result-satisfying.',
-    process: ['Discover', 'Define', 'Design', 'Test', 'Ship'],
-    outcome: '4.8★ App Store rating within 90 days. 200K+ downloads in Q1.',
-    role: 'Lead UI/UX Designer',
-    studio: 'Kite Games Studio',
-    duration: '4 Months'
-  },
-  {
-    id: 'lampre',
-    featured: true,
-    title: 'Lampre',
-    sub: 'Editorial',
-    thumbnail: '/project-2.png',
-    heroImage: '/project-2.png',
-    gallery: ['/project-2.png', '/project-2.png', '/project-2.png'],
-    size: 'small',
-    platform: 'Android',
-    emoji: '🌫️',
-    problem: 'Android users lacked a high-quality, intuitive bokeh tool that could replicate DSLR-style depth-of-field.',
-    goal: 'Build a playful yet powerful blur studio that makes professional photo aesthetics instant and accessible.',
-    process: ['Research', 'Concept', 'Prototype', 'Validate', 'Launch'],
-    outcome: 'Reached #1 in Photo & Video on Google Play in 3 markets.',
-    role: 'Product Designer',
-    studio: 'Creative Studio',
-    duration: '3 Months'
-  },
-  {
-    id: 'lexus',
-    featured: false,
-    title: 'Lexus',
-    sub: 'Automotive',
-    thumbnail: '/project-3.png',
-    heroImage: '/project-3.png',
-    gallery: ['/project-3.png', '/project-3.png', '/project-3.png'],
-    size: 'small',
-    platform: 'Web',
-    emoji: '🚗',
-    problem: 'The automotive experience needed a digital bridge that matched the luxury and precision of the Lexus brand.',
-    goal: 'Create an immersive, interactive automotive configurator that feels as high-end as the cars themselves.',
-    process: ['Discovery', 'UX Flow', 'Visual Design', 'Interaction', 'Handover'],
-    outcome: 'Increased engagement by 40% on the configurator page.',
-    role: 'Interaction Designer',
-    studio: 'Luxury Digital',
-    duration: '6 Months'
-  }
-];
+  populateCaseStudy({ id: 'project-03b9e759-7ea5-474a-9ee6-f356d141f71c', title: 'Blur Photo Editor', name: 'Blur Photo Editor', platform: 'Android App', featured: true, thumbnail: `${media}/project-03b9e759-7ea5-474a-9ee6-f356d141f71c/3d48c41e-9302-4902-b940-7bcd45180e3f.webp` }),
+  populateCaseStudy({ id: 'project-9919bf33-980d-4653-8e5b-1c66e34e5b7e', title: 'Unblur', platform: 'iOS App', featured: true, role: 'Lead UI/UX Designer', studio: 'Kite Games Studio', duration: '06 Month', thumbnail: `${media}/project-9919bf33-980d-4653-8e5b-1c66e34e5b7e/79c6f7cd-4fbd-426e-aa03-caf7c68b55fa.webp`, heroImage: `${media}/project-9919bf33-980d-4653-8e5b-1c66e34e5b7e/3f014062-477c-4c04-8246-f06ad91db01c.webp` }),
+  concept('beauty-editor', 'Beauty Editor', 'Portrait editing, with a lighter touch.', 'A design direction for a portrait-editing experience that keeps the photograph at the center and makes creative adjustments feel approachable.', 'Balance a useful range of editing options with a calm interface. Controls should support the photograph rather than compete with it.', 'A restrained layout, clear tool grouping, and gentle color accents set the direction for this project. The emphasis is on an approachable editing experience and an unobstructed view of the portrait.'),
+  concept('time-warp', 'Time Warp', 'A playful perspective on motion.', 'A mobile interaction design direction centered on time-warp effects, with an emphasis on a clear camera experience and playful visual feedback.', 'Make an unfamiliar visual effect feel understandable. A clear starting point and distinct interaction cues give the experience a simple structure.', 'The direction favors a large preview, minimal interface clutter, and a strong primary control. Visual feedback should help people understand the effect while leaving room for experimentation.'),
+  concept('retouch', 'Retouch', 'Less distraction. More photograph.', 'A photo-editing design direction focused on precise adjustments, clear tool selection, and keeping attention on the image.', 'Present useful editing tools without overwhelming the canvas. Clear grouping and a distinct active state can make detailed work feel more manageable.', 'The interface direction uses a restrained visual hierarchy, accessible tool labels, and supporting controls around the image. The aim is an editing experience that feels deliberate and focused.'),
+].map((project, sortOrder) => ({ ...project, sortOrder }));

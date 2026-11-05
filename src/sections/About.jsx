@@ -13,11 +13,24 @@ export default function About() {
   const cursorRef = useRef(null);
   const clickRef = useRef(null);
   const boxRef = useRef(null);
+  const sizeRef = useRef(null);
   const played = useRef(false);
   const inView = useInView(frameRef, { amount: 0.35, once: true });
   const reduced = useReducedMotion();
   const [completed, setCompleted] = useState(false);
   const [interacting, setInteracting] = useState(false);
+
+  useEffect(() => {
+    const box = boxRef.current;
+    const update = () => {
+      const { width, height } = box.getBoundingClientRect();
+      if (sizeRef.current) sizeRef.current.textContent = `${Math.round(width)}px × ${Math.round(height)}px`;
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(box);
+    update();
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -68,7 +81,7 @@ export default function About() {
         </a>
       </div>
       <div ref={frameRef} className={`about-selection-frame ${completed || reduced ? 'about-selection-complete' : ''}`} onPointerDown={() => { setCompleted(true); setInteracting(true); }}>
-        <span aria-hidden="true" ref={boxRef} className="about-drag-selection">{['top-left','top-right','bottom-left','bottom-right'].map(corner => <span key={corner} className={`about-frame-handle about-frame-${corner}`} />)}</span>
+        <span aria-hidden="true" ref={boxRef} className="about-drag-selection"><span ref={sizeRef} className="about-size-label">0px × 0px</span>{['top-left','top-right','bottom-left','bottom-right'].map(corner => <span key={corner} className={`about-frame-handle about-frame-${corner}`} />)}</span>
         <p className="about-belief-label">A little about me</p>
         <blockquote className="about-selection-quote">
           <span aria-hidden="true" className="about-quote-mark">“</span>

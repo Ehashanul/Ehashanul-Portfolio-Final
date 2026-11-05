@@ -17,6 +17,9 @@ export const projectSections = project => Array.isArray(project.sections) ? proj
 
 export const visibleProjectSections = project => projectSections(project).filter(section =>
   !section.hidden &&
+  (section.type !== 'image' || Boolean(section.src)) &&
+  (section.type !== 'link' || Boolean(externalUrl(section.url))) &&
+  (section.type !== 'metrics' || section.items?.some(item => item.value || item.label)) &&
   (section.type !== 'text' || section.body?.trim()) &&
   (section.type !== 'gallery' || section.images?.some(image => image.src))
 );

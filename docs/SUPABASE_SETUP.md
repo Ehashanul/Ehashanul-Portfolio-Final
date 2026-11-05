@@ -84,3 +84,13 @@ Use separate Supabase development and production projects where possible. Keep S
 Included: admin login, backend authorization policies, editable project drafts, image optimization/uploads, published snapshots, featured/order controls, private draft preview, trash/restore, content export, cloud-backed public pages.
 
 Not yet included: full revision history/rollback, in-app restore from backup, account recovery UI, automatic cloud backups/media cleanup, drag-and-drop ordering, and CV/settings management. Admin passwords can be managed in Supabase Dashboard. These can be added without replacing the database.
+
+## Project details pages
+
+Each published project now opens at `#/project/<project-id>` from All Projects or the homepage. The external URL is a separate optional button inside the case study.
+
+In **Edit project**, use **Project details page** to manage the headline, introduction, hero image, image description/caption, role, studio, timeline, year, services, and tools. Empty headline/introduction/hero fields fall back to the existing card content. Hide the hero or project facts if they are not needed.
+
+Use **Case study sections** to add text, full-width images, galleries, results, or links. Sections can be reordered, hidden, or removed. Text supports editorial or wide layouts; galleries support one or two columns, descriptions, captions, and image ordering. Empty sections are omitted. Existing projects use their saved sections or a suggested structure based on their existing content, so no content migration is required.
+
+**Preview draft** renders the same case-study component as the public website and resolves private uploaded images for the signed-in editor. **Save draft** keeps edits private; **Save & publish** releases the new version and its visible images. Hidden sections remain in the private draft. These settings use the existing JSON content fields; no new Supabase migration is needed.

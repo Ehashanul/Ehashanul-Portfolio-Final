@@ -102,3 +102,7 @@ For an existing Supabase project, run `supabase/migrations/002_case_study_conten
 The update stores the current case-study copy, mockup paths, homepage thumbnails, role, timeline, and project status. It also updates `publish_project` to reuse published bento-image URLs. It retains custom and hidden draft sections, retains already-public custom sections, skips trashed projects, and does not publish projects that are currently unpublished. The other three project records are untouched.
 
 The mockups are hosted with the portfolio in `public/projects/`, so no Storage bucket change is required. Regenerate the prepared update after a source content revision with `node scripts/build-supabase-content-sync.cjs`.
+
+### Aligned project thumbnail
+
+After deploying the updated assets, run `supabase/migrations/003_aligned_thumbnail.sql` in SQL Editor to store the proportion-correct Blur Photo Editor thumbnail. It only updates the generated thumbnail path/version, skips trashed projects, and leaves custom thumbnail URLs unchanged. Page transitions require no Supabase changes.

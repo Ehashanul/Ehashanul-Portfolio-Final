@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import Hero from '../sections/Hero';
 import Expertise from '../sections/Expertise';
 import About from '../sections/About';
@@ -9,12 +8,7 @@ import FAQ from '../sections/FAQ';
 
 const Home = () => {
   return (
-    <motion.main
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 0.97 }}
-      transition={{ duration: 0.5 }}
-    >
+    <main>
       <Hero />
       <About />
       <TechStack />
@@ -22,7 +16,7 @@ const Home = () => {
       <ProjectShowcase />
       <FAQ />
       <Contact />
-    </motion.main>
+    </main>
   );
 };
 

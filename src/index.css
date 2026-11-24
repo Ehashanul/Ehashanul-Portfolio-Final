@@ -11,6 +11,9 @@
   .font-display { font-weight: 500; letter-spacing: -0.045em; }
 }
 
+.portfolio-page-transition { position: relative; z-index: 10; }
+.portfolio-page-transition > main:focus { outline: none; }
+
 .expertise-hover-section { scroll-margin-top: 110px; }
 .expertise-stack { position: relative; width: 100%; }
 .expertise-dust-definitions { position: absolute; pointer-events: none; overflow: hidden; }

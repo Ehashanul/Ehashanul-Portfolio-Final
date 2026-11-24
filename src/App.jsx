@@ -1,6 +1,5 @@
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { useEffect } from 'react';
 import Home from './pages/Home';
 import AllProjects from './pages/AllProjects';
 import ProjectDetails from './pages/ProjectDetails';
@@ -8,34 +7,14 @@ import Admin from './pages/Admin';
 import CustomCursor from './components/CustomCursor';
 import Navbar from './components/Navbar';
 import HalftoneWordmarkFooter from './components/ui/halftone-wordmark-footer';
-
-// Component to handle scroll reset on route change
-function ScrollToTop() {
-  const { pathname, hash } = useLocation();
-
-  useEffect(() => {
-    if (hash) {
-      const element = document.getElementById(hash.replace('#', ''));
-      if (element) {
-        // Wait for page transition to finish before scrolling
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-        return;
-      }
-    }
-    window.scrollTo(0, 0);
-  }, [pathname, hash]);
-
-  return null;
-}
+import PageTransition from './components/PageTransition';
 
 function AppLayout() {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const isAdmin = pathname.replace(/\/+$/, '') === '/admin';
   return (
     <>
-      <ScrollToTop />
       <div className={isAdmin ? 'admin-layout relative min-h-screen' : 'relative min-h-screen cursor-none'}>
         <CustomCursor />
         {/* Background Layers */}
@@ -46,13 +25,15 @@ function AppLayout() {
 
         {!isAdmin && <Navbar />}
 
-        <AnimatePresence mode="wait">
-          <Routes>
+        <AnimatePresence mode="wait" initial={false}>
+          <PageTransition key={pathname} location={location}>
+          <Routes location={location}>
             <Route path="/" element={<Home />} />
             <Route path="/projects" element={<AllProjects />} />
             <Route path="/project/:id" element={<ProjectDetails />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
+          </PageTransition>
         </AnimatePresence>
 
         {!isAdmin && <footer className="relative z-10 bg-black overflow-hidden">

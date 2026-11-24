@@ -7,11 +7,12 @@ import './AllProjects.css';
 
 
 function ProjectCard({ project, index, reduced }) {
-  const image = !project.hideCardImage && mediaUrl(project.thumbnail || project.img || project.heroImage);
+  const image = !project.hideCardImage && mediaUrl(project.bentoImage || project.thumbnail || project.img || project.heroImage);
+  const imageAlt = project.bentoImage ? (project.bentoAlt || `${project.title} project mockup`) : (project.thumbnailAlt || (project.hideCardTitle ? '' : project.title));
   return <motion.article layout={!reduced} transition={{ duration: reduced ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
     id={`project-${project.id}`} className="archive-project">
     {!project.hideCardImage && <div className="archive-project-image">
-      {image ? <img src={image} alt={project.thumbnailAlt || (project.hideCardTitle ? '' : project.title)} loading={index < 3 ? 'eager' : 'lazy'} decoding="async" />
+      {image ? <img src={image} alt={imageAlt} loading={index < 3 ? 'eager' : 'lazy'} decoding="async" />
         : <div className="archive-project-placeholder" aria-hidden="true"><span>{String(index + 1).padStart(2, '0')}</span></div>}
       {!project.hideCardTitle ? <h2 className="archive-project-tab">{project.title}</h2> : <span className="archive-project-tab">{project.name || project.platform || 'Project'}</span>}
       <span className="archive-image-visit">View project <ArrowUpRight size={15} /></span>
@@ -35,7 +36,7 @@ export default function AllProjects() {
   const projects = useProjects();
   const reduced = useReducedMotion();
 
-  return <motion.main className="project-archive" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+  return <main className="project-archive">
     <header className="archive-header">
       <Link to="/" className="archive-back"><ArrowLeft size={14} /> Back to home</Link>
       <div className="archive-intro">
@@ -50,5 +51,5 @@ export default function AllProjects() {
       {!projects.length && <div className="archive-empty"><h2>Good work is on its way.</h2><p>Projects will appear here when published.</p></div>}
       <div className="archive-end"><span>Thoughtful design. Every detail.</span><Link to="/#contact">Have something in mind? <ArrowUpRight size={16} /></Link></div>
     </section>
-  </motion.main>;
+  </main>;
 }

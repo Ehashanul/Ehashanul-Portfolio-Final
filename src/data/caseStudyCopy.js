@@ -189,7 +189,7 @@ function populateUnblurMockups(project) {
 // continuing management. No unprovided research or business metrics are added.
 function populateBlurPhotoCaseStudy(project) {
   if (project.id !== 'project-03b9e759-7ea5-474a-9ee6-f356d141f71c') return project;
-  if (project.blurPhotoStoryVersion >= 1) return project.blurPhotoThumbnailVersion >= 2 ? project : { ...project, blurPhotoThumbnailVersion: 2, bentoImage: '/projects/blur-photo-editor/thumbnail-onboarding.webp' };
+  if (project.blurPhotoStoryVersion >= 1) return project.blurPhotoThumbnailVersion >= 3 ? project : { ...project, blurPhotoThumbnailVersion: 3, bentoImage: '/projects/blur-photo-editor/thumbnail-onboarding-aligned.webp' };
   const visual = (id, file, alt, caption) => ({ id, type: 'image', src: `/projects/blur-photo-editor/${file}.svg`, alt, caption });
   const narrative = [
     text('overview', 'A bigger product. A simpler way to edit.', 'Blur Photo Editor brings together blur tools, image restoration, enhancement, and AI-powered creative styles. I led the design work over roughly a year and managed the project through its relaunch. I continue to manage the app today.\n\nThe new version focused on the editing experience: helping people find the right tool, understand the current mode, and make adjustments without losing sight of their photograph.'),
@@ -219,13 +219,13 @@ function populateBlurPhotoCaseStudy(project) {
   const existing = project.sections || [];
   const sections = narrative.map(section => existing.find(item => item.id === section.id)?.hidden ? { ...section, hidden: true } : section);
   sections.push(...existing.filter(section => !legacy.has(section.id) && !narrative.some(item => item.id === section.id)));
-  return { ...project, blurPhotoStoryVersion: 1, blurPhotoThumbnailVersion: 2, caseStudyCopyVersion: COPY_VERSION, caseStudyResultsVersion: 1,
+  return { ...project, blurPhotoStoryVersion: 1, blurPhotoThumbnailVersion: 3, caseStudyCopyVersion: COPY_VERSION, caseStudyResultsVersion: 1,
     title: 'Blur Photo Editor', name: 'Blur Photo Editor', platform: 'Android App', role: 'Lead UI/UX Designer & Project Lead', duration: 'Approximately 1 year', status: 'Relaunched · Ongoing management',
     headline: 'A simpler editing experience. A relaunch I led.',
     summary: 'Over roughly a year, I led the design of Blur Photo Editor and managed the project through its relaunch. The new version focused on making editing easier through clearer tool organization, task-based flows, and a more consistent interface. I continue to manage the app today.',
     description: 'Lead design and project ownership for a photo-editing app relaunch, with a focus on simpler editing UX and ongoing product management.',
     deliverables: ['UI/UX design', 'Onboarding', 'Editing workflows', 'AI-filter experience', 'Premium presentation', 'Relaunch coordination'],
     thumbnail: '/projects/blur-photo-editor/cover.svg', thumbnailAlt: 'Blur Photo Editor identity with layered violet and orange forms',
-    bentoImage: '/projects/blur-photo-editor/thumbnail-onboarding.webp', heroImage: '/projects/blur-photo-editor/hero-studio.webp', heroAlt: 'The redesigned Blur Photo Editor workspace in a black Android device mockup', heroCaption: 'Blur Photo Editor / Lead design, relaunch, and ongoing management', hideHero: false, gallery: [], sections,
+    bentoImage: '/projects/blur-photo-editor/thumbnail-onboarding-aligned.webp', heroImage: '/projects/blur-photo-editor/hero-studio.webp', heroAlt: 'The redesigned Blur Photo Editor workspace in a black Android device mockup', heroCaption: 'Blur Photo Editor / Lead design, relaunch, and ongoing management', hideHero: false, gallery: [], sections,
   };
 }

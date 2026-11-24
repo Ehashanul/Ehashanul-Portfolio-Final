@@ -1,0 +1,47 @@
+{
+  "device": "iPhone 18 Pro",
+  "reference": "https://www.apple.com/iphone-18-pro/",
+  "compositions": [
+    {
+      "asset": "hero-studio-v2.webp",
+      "screens": [
+        "onboarding"
+      ]
+    },
+    {
+      "asset": "creative-flow-v4.svg",
+      "screens": [
+        "feature-access",
+        "editor",
+        "saved-result"
+      ]
+    },
+    {
+      "asset": "upgrade-v2.svg",
+      "screens": [
+        "paywall",
+        "purchase-success"
+      ]
+    },
+    {
+      "asset": "settings-v2.svg",
+      "screens": [
+        "settings"
+      ]
+    },
+    {
+      "asset": "feedback-v4.webp",
+      "screens": [
+        "feedback"
+      ]
+    },
+    {
+      "asset": "cover-v2.svg",
+      "screens": []
+    },
+    {
+      "asset": "bento-v2.svg",
+      "screens": []
+    }
+  ]
+}

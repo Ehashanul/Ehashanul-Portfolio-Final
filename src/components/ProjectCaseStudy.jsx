@@ -14,6 +14,7 @@ export default function ProjectCaseStudy({ project, preview = false, nextProject
     [project.date ? 'Date' : project.year ? 'Year' : 'Timeline', project.date || project.year || project.duration],
     ['Services', services.join(', ') || project.role],
     ['Project team', project.team || project.studio],
+    ['Status', project.status],
     ['Tools', tools.join(', ')],
   ].filter(([, value]) => value);
   return <article className={`case-study${preview ? ' case-study-preview' : ''}`}>

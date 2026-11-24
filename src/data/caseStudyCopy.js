@@ -1,4 +1,4 @@
-﻿// Owner-requested copy for the two existing published projects.
+// Owner-requested copy for the two existing published projects.
 // Applied once to legacy content; saving through the admin stores the version
 // marker so later edits (including deliberately empty fields) are respected.
 const COPY_VERSION = 1;
@@ -67,6 +67,8 @@ function populateResults(project) {
 }
 
 export function populateCaseStudy(project) {
+  project = populateBlurPhotoCaseStudy(project);
+  project = populateUnblurMockups(populateUnblurCaseStudy(project));
   const copy = COPY[project.id];
   if (!copy || project.caseStudyCopyVersion >= COPY_VERSION) return populateResults(project);
   const next = { ...project, caseStudyCopyVersion: COPY_VERSION };
@@ -98,4 +100,132 @@ export function populateCaseStudy(project) {
 export function populateDraft(draft) {
   const { id: _id, ...content } = populateCaseStudy({ ...draft.content, id: draft.id });
   return { ...draft, content };
+}
+
+// November 2026: owner-supplied screens and confirmed lead-designer role.
+// Upgrade only once so subsequent admin edits and deliberate removals survive.
+function populateUnblurCaseStudy(project) {
+  if (project.id !== 'project-9919bf33-980d-4653-8e5b-1c66e34e5b7e' || project.unblurStoryVersion >= 1) return project;
+  const image = (id, file, alt, caption = '') => ({ id, type: 'image', src: `/projects/unblur/${file}`, alt, caption });
+  const narrative = [
+    text('overview', 'Make the possibility visible.', 'Unblur helps people enhance their photographs and explore AI-powered creative styles. I was the main designer of the project, shaping the visual experience across onboarding, editing, feature access, the paywall, and purchase confirmation.\n\nThe opportunity was to make the value of the product easier to see—and carry that clarity through the moments when someone decides to start, save a result, or upgrade.'),
+    text('contributions', 'One designer. A connected journey.', 'As lead UI/UX designer, I worked across the key screens presented in this case study. My focus was the connection between visual communication and action: introducing the product clearly, keeping the photograph prominent during editing, and making the benefits of PRO distinct.\n\nA shared dark canvas, purple gradients, rounded controls, and consistent emphasis connect the experience from the first screen to the final confirmation.'),
+    image('journey-visual', 'hero.svg', 'Three Unblur screen mockups showing onboarding, the creative editor, and the PRO paywall', 'The core journey: understand the promise, explore the tools, and discover PRO.'),
+    text('challenge', 'An AI product should not feel complicated.', 'The interface brings together several decisions: choosing a creative style, comparing the result, saving an image, and deciding whether premium access is worthwhile. Each moment needs a clear priority.\n\nThe design challenge was to make an expressive, feature-rich app feel approachable while giving the upgrade journey a place within the experience.'),
+    text('onboarding-story', 'Show the difference before explaining it.', 'The welcome screen uses an overlapping photo comparison to introduce the product visually. A short headline supports the image, and a single Get Started button gives the screen an unmistakable next step.\n\nThe purple accent links the Unblur name with the primary action. Supporting information stays secondary so the first impression remains focused on the product’s promise.'),
+    image('onboarding-visual', 'onboarding.svg', 'Unblur onboarding screen presented in a graphite phone mockup', 'An image-led introduction with one clear starting action.'),
+    text('editing-story', 'Keep the photograph at the center.', 'In the creative editor, the before-and-after comparison occupies most of the screen. Style categories and preview thumbnails sit below the image, with a purple selection outline identifying the active choice.\n\nRegenerate stays close to the result, while Save remains available in the top bar. The saved-result screen confirms completion and keeps sharing, returning home, and watermark removal within reach.'),
+    image('editing-visual', 'creative-flow.svg', 'Unblur creative editor, saved result, and feature-access screen presented as three phone mockups', 'Explore a style, compare the image, save the result, and discover the next option.'),
+    text('upgrade-story', 'Make the upgrade understandable.', 'The feature-access screen presents two distinct paths: watch an ad to continue or upgrade to PRO. The filled purple button gives the premium route stronger visual emphasis while preserving the alternative.\n\nThe paywall connects the offer to the product through a large photographic example and a short benefits list. Separate subscription cards, a selected state, a trial toggle, and a prominent Continue button organize the purchase decision.'),
+    image('upgrade-visual', 'upgrade.svg', 'The Unblur PRO paywall and successful purchase confirmation in paired device mockups', 'A consistent visual language connects the premium offer with the confirmation that follows.'),
+    text('completion-story', 'Finish the purchase with a clear welcome.', 'The purchase-confirmation screen makes the new PRO status explicit. The crown and celebratory imagery mark the transition, while the Continue button provides a straightforward return to the app.\n\nThe settings screen carries the same identity into the supporting experience, bringing premium access, purchase restoration, help, and legal information into an organized list.'),
+    image('settings-visual', 'settings.svg', 'Unblur settings screen with the PRO promotion and account-support options', 'The same product identity extends beyond the editor.'),
+    text('outcomes', 'A clearer experience, with business impact.', 'Following the design work, the project saw increases in download and purchase rates. My contribution focused on the screens that communicate the product’s value and support the journey from first use to premium access.\n\nThe work connects product presentation, creative exploration, saving, and upgrading through a consistent interface. The visual story remains centered on the photograph, with clear actions at each step.'),
+    { id: 'project-results', type: 'metrics', heading: 'Results', items: [{ value: '↑', label: 'Download rate increased' }, { value: '↑', label: 'Purchase rate increased' }] },
+  ];
+  const legacy = new Set(['overview','contributions','challenge','goals','research','process','decisions','gallery-intro','gallery','design-gallery','validation','outcomes','lessons','project-results']);
+  const existing = project.sections || [];
+  const sections = narrative.map(section => {
+    const previous = existing.find(item => item.id === section.id);
+    return previous?.hidden ? { ...section, hidden: true } : section;
+  });
+  sections.push(...existing.filter(section => !legacy.has(section.id) && !narrative.some(item => item.id === section.id)));
+  return {
+    ...project,
+    unblurStoryVersion: 1,
+    caseStudyCopyVersion: COPY_VERSION,
+    caseStudyResultsVersion: 1,
+    title: 'Unblur',
+    role: 'Lead UI/UX Designer',
+    headline: 'From a clearer photo to a clearer product experience.',
+    summary: 'I led the design of Unblur’s core iOS experience—from the first impression to creative editing and PRO access. The project brought together an expressive visual identity, focused actions, and an upgrade journey, alongside increases in download and purchase rates.',
+    description: 'Lead UI/UX design for an AI photo app, connecting onboarding, creative tools, and the premium experience.',
+    thumbnail: '/projects/unblur/cover.svg',
+    bentoImage: '/projects/unblur/hero-studio.webp',
+    thumbnailAlt: 'Unblur onboarding screen in a graphite device mockup on a muted lavender background',
+    heroImage: '/projects/unblur/hero-studio.webp',
+    heroAlt: 'Studio presentation of the Unblur onboarding screen in a graphite smartphone',
+    heroCaption: 'Unblur / Lead UI & UX design',
+    hideHero: false,
+    deliverables: ['UI/UX design', 'Visual direction', 'Onboarding', 'Creative editor', 'Paywall & PRO journey'],
+    gallery: [],
+    sections,
+  };
+}
+
+function populateUnblurMockups(project) {
+  if (project.id !== 'project-9919bf33-980d-4653-8e5b-1c66e34e5b7e') return project;
+  if (project.unblurMockupVersion >= 4) return project.unblurThumbnailVersion >= 1 ? project : { ...project, unblurThumbnailVersion: 1, bentoImage: '/projects/unblur/hero-studio-v2.webp' };
+  const removed = new Set(['journey-visual', 'onboarding-visual', 'feature-access-visual']);
+  const revised = {
+    'editing-story': {
+      heading: 'From feature access to the final save.',
+      body: 'The feature-access screen gives people two distinct paths: watch an ad to continue or upgrade to PRO. The filled purple action emphasizes the premium option while keeping the alternative available.\n\nOnce inside the creative editor, the photograph remains the focus. A before-and-after comparison, grouped style previews, and a visible selected state support exploration. Saving leads to a clear confirmation, with sharing and watermark removal close to the finished result.',
+    },
+    'editing-visual': { src: '/projects/unblur/creative-flow-v4.svg', alt: 'Feature access, creative editing, and saving presented left to right in three iPhone 18 Pro mockups', caption: '01 / Feature access → Editing → Saving' },
+    'upgrade-story': {
+      heading: 'Make the premium offer understandable.',
+      body: 'The paywall connects the offer to the product through a large photographic example and a concise benefits list. Separate subscription cards make the available plans distinct, while the purple selection state identifies the current choice.\n\nA trial control and a prominent Continue button organize the next step. The purchase-confirmation screen then makes the new PRO status explicit and gives the user a clear route back into the app.',
+    },
+    'upgrade-visual': { src: '/projects/unblur/upgrade-v2.svg', alt: 'Unblur paywall and purchase confirmation in black iPhone 18 Pro mockups', caption: '02 / Paywall → Purchase confirmation' },
+    'settings-visual': { src: '/projects/unblur/settings-v2.svg', alt: 'Unblur settings in a black iPhone 18 Pro mockup', caption: '03 / Settings and support' },
+  };
+  const sections = (project.sections || []).filter(section => !removed.has(section.id)).map(section => revised[section.id] ? { ...section, ...revised[section.id] } : section);
+  if (!sections.some(section => section.id === 'editing-visual')) {
+    const index = sections.findIndex(section => section.id === 'editing-story');
+    sections.splice(index < 0 ? sections.length : index+1, 0, { id: 'editing-visual', type: 'image', ...revised['editing-visual'] });
+  }
+  if (!sections.some(section => section.id === 'feedback-visual')) {
+    const index = sections.findIndex(section => section.id === 'settings-visual');
+    const story = text('feedback-story', 'Invite feedback in the product’s own voice.', 'The rating screen extends Unblur’s visual identity into a moment of feedback. Layered review cards introduce the request, while the app icon and purple accents connect it to the rest of the experience.\n\nA short invitation and one Rate us button keep the action clear. The layered composition gives this supporting moment a more expressive character while preserving the same visual language.');
+    const image = { id: 'feedback-visual', type: 'image', src: '/projects/unblur/feedback-v4.webp', alt: 'Unblur rating invitation and review-card collage presented on an iPhone 18 Pro', caption: '04 / Rating invitation' };
+    sections.splice(index < 0 ? sections.length : index+1, 0, story, image);
+  }
+  return { ...project, unblurMockupVersion: 4, unblurThumbnailVersion: 1, thumbnail: '/projects/unblur/cover-v2.svg', thumbnailAlt: 'Unblur visual identity with layered lavender forms', bentoImage: '/projects/unblur/hero-studio-v2.webp', heroImage: '/projects/unblur/hero-studio-v2.webp', heroAlt: 'Unblur onboarding screen presented on a black iPhone 18 Pro', heroCaption: 'Unblur / Onboarding', sections };
+}
+
+
+// Owner-supplied legacy/current screens, lead role, relaunch ownership, and
+// continuing management. No unprovided research or business metrics are added.
+function populateBlurPhotoCaseStudy(project) {
+  if (project.id !== 'project-03b9e759-7ea5-474a-9ee6-f356d141f71c') return project;
+  if (project.blurPhotoStoryVersion >= 1) return project.blurPhotoThumbnailVersion >= 2 ? project : { ...project, blurPhotoThumbnailVersion: 2, bentoImage: '/projects/blur-photo-editor/thumbnail-onboarding.webp' };
+  const visual = (id, file, alt, caption) => ({ id, type: 'image', src: `/projects/blur-photo-editor/${file}.svg`, alt, caption });
+  const narrative = [
+    text('overview', 'A bigger product. A simpler way to edit.', 'Blur Photo Editor brings together blur tools, image restoration, enhancement, and AI-powered creative styles. I led the design work over roughly a year and managed the project through its relaunch. I continue to manage the app today.\n\nThe new version focused on the editing experience: helping people find the right tool, understand the current mode, and make adjustments without losing sight of their photograph.'),
+    text('contributions', 'Leading the design—and carrying it through launch.', 'My role extended beyond individual screens. I was the lead designer and managed the project through the relaunch, connecting the interface work with the delivery of the new version.\n\nThe scope presented here spans onboarding, feature discovery, photo selection, editing tools, AI styles, and premium offers. That responsibility continues through my ongoing management of the app.'),
+    visual('home-comparison', 'home-before-after', 'Previous and relaunched Blur Photo Editor home screens, labeled before and after', '01 / Home screen: previous version → Relaunch'),
+    text('challenge', 'The challenge was not adding another tool.', 'The app already offered a broad range of editing capabilities. The design task was to organize that breadth into an experience that felt easier to use.\n\nThe earlier screens placed many tools and effects close together. In the relaunch, the focus shifted toward clearer entry points, task-specific controls, and more consistent editing patterns.'),
+    text('onboarding-story', 'Begin with the user’s intention.', 'The new introduction moves from a visual overview of the product to a choice of goals: Pro Portrait, Fix & Restore, or AI Filter. A subsequent preview shows the kind of change the selected direction can offer.\n\nThis gives the opening flow a practical purpose. Rather than presenting every capability at once, it starts with what someone wants to achieve with their photo.'),
+    visual('onboarding-visual', 'onboarding', 'The relaunched app introduction, goal selection, and portrait preview in three Android screen mockups', '02 / Introduction → Goal selection → Feature preview'),
+    text('discovery-story', 'Connect inspiration with a clear starting point.', 'The photo picker brings image selection into a dedicated screen, with a visible Gallery action and grouped photo sources. Preset previews give a creative effect its own introduction before someone enters the editor.\n\nThese screens separate choosing an image from choosing a direction, giving each decision a clearer place in the experience.'),
+    visual('discovery-visual', 'discovery', 'Photo selection and an Acrylic Art preset preview in the redesigned app', '03 / Choose a photo → Preview a creative direction'),
+    text('editing-story', 'Make the editing hierarchy easier to follow.', 'The redesigned blur workspace separates the task from the adjustment. Touch Blur, Face Blur, Effects, and Shape sit within a consistent mode selector, while the active mode exposes its relevant controls above it.\n\nIntensity stays close to the image, and undo, redo, comparison, confirmation, and cancellation retain distinct places. The aim was to make the current action easier to understand without shrinking the photograph into a secondary element.'),
+    visual('editing-comparison', 'editing-before-after', 'The older effects workspace next to the relaunched blur workspace', '04 / Editing workspace: previous version → Relaunch'),
+    text('editing-modes-story', 'Different tools, familiar patterns.', 'Face selection, blur effects, shape controls, and image sharpening serve different purposes. The new screens use a shared control structure so the interface does not feel like a different product every time the tool changes.\n\nA visible active state, a consistent intensity control, and recognizable completion actions give these capabilities a common editing language.'),
+    visual('editing-modes-visual', 'editing-modes', 'Four redesigned editing modes: Face Blur, Effects, Shape, and Unblur', '05 / Face Blur → Effects → Shape → Unblur'),
+    text('ai-story', 'Structure the creative exploration.', 'The AI Filter experience keeps style categories and thumbnail previews below a large result area. The selected style is visible, and the generated-result state places Regenerate near the image.\n\nThe comparison shows how the newer interface organizes browsing and result review while keeping the creative output prominent.'),
+    visual('ai-comparison', 'ai-before-after', 'The previous AI-filter screen and two redesigned AI-filter states', '06 / Previous AI filters → New result and browsing states'),
+    text('feature-entry-story', 'Introduce capabilities where they make sense.', 'The feature-entry screens use a focused preview and a direct action to introduce a specific tool, such as blur or restoration. They carry the visual language of the new home screen into a more contextual explanation.\n\nThe goal is a more understandable transition from discovering a capability to using it.'),
+    visual('feature-entry-visual', 'feature-entry', 'Contextual introductions to blur and restoration tools', '07 / Contextual entry points for individual tools'),
+    text('premium-story', 'Give the premium decision a clearer structure.', 'The relaunch also included the premium presentation. The newer screen organizes the feature summary, available plans, selected state, trial control, and Continue action into a stronger hierarchy.\n\nA visible selected plan, a concise feature summary, and a distinct primary action give the decision a more focused presentation.'),
+    visual('premium-comparison', 'premium-before-after', 'The previous subscription screen next to a relaunch paywall variant', '08 / Premium presentation: previous version → Relaunch'),
+    text('offers-story', 'Keep offers part of the same experience.', 'The supplied annual-offer and feature-offer designs explore additional ways to present premium access. They retain the app’s dark surfaces, purple emphasis, rounded containers, and distinct primary actions.\n\nThese variants are shown as part of the design scope, with a consistent visual system connecting the offer to the product behind it.'),
+    visual('offers-visual', 'offers', 'Annual and feature-based premium offer designs', '09 / Annual-offer and feature-offer designs'),
+    text('relaunch-story', 'The relaunch was a milestone, not the finish line.', 'I managed the project through the relaunch and continue managing the app. That ongoing responsibility keeps the work connected to the product after the redesigned screens have shipped.\n\nThe central contribution was a revised editing experience: clearer navigation between tasks, more consistent controls, and a more deliberate path from discovery to editing.'),
+    { id: 'project-results', type: 'metrics', heading: 'Project milestones', items: [{ value: '~1 year', label: 'Lead design and project work through relaunch' }, { value: 'Relaunched', label: 'Managed the project through the new release' }, { value: 'Ongoing', label: 'Continuing responsibility for the app' }] },
+  ];
+  const legacy = new Set(['overview','contributions','challenge','goals','research','process','decisions','gallery-intro','gallery','design-gallery','validation','outcomes','lessons','project-results']);
+  const existing = project.sections || [];
+  const sections = narrative.map(section => existing.find(item => item.id === section.id)?.hidden ? { ...section, hidden: true } : section);
+  sections.push(...existing.filter(section => !legacy.has(section.id) && !narrative.some(item => item.id === section.id)));
+  return { ...project, blurPhotoStoryVersion: 1, blurPhotoThumbnailVersion: 2, caseStudyCopyVersion: COPY_VERSION, caseStudyResultsVersion: 1,
+    title: 'Blur Photo Editor', name: 'Blur Photo Editor', platform: 'Android App', role: 'Lead UI/UX Designer & Project Lead', duration: 'Approximately 1 year', status: 'Relaunched · Ongoing management',
+    headline: 'A simpler editing experience. A relaunch I led.',
+    summary: 'Over roughly a year, I led the design of Blur Photo Editor and managed the project through its relaunch. The new version focused on making editing easier through clearer tool organization, task-based flows, and a more consistent interface. I continue to manage the app today.',
+    description: 'Lead design and project ownership for a photo-editing app relaunch, with a focus on simpler editing UX and ongoing product management.',
+    deliverables: ['UI/UX design', 'Onboarding', 'Editing workflows', 'AI-filter experience', 'Premium presentation', 'Relaunch coordination'],
+    thumbnail: '/projects/blur-photo-editor/cover.svg', thumbnailAlt: 'Blur Photo Editor identity with layered violet and orange forms',
+    bentoImage: '/projects/blur-photo-editor/thumbnail-onboarding.webp', heroImage: '/projects/blur-photo-editor/hero-studio.webp', heroAlt: 'The redesigned Blur Photo Editor workspace in a black Android device mockup', heroCaption: 'Blur Photo Editor / Lead design, relaunch, and ongoing management', hideHero: false, gallery: [], sections,
+  };
 }

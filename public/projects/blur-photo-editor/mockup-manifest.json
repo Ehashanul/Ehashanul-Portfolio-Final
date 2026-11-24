@@ -1,0 +1,99 @@
+{
+  "project": "Blur Photo Editor",
+  "device": "Android app presentation",
+  "compositions": [
+    {
+      "asset": "cover.svg",
+      "screens": [],
+      "number": "SELECTED WORK"
+    },
+    {
+      "asset": "bento.svg",
+      "screens": [],
+      "number": "SELECTED WORK"
+    },
+    {
+      "asset": "home-before-after.svg",
+      "screens": [
+        "old-home",
+        "main-home"
+      ],
+      "number": "01"
+    },
+    {
+      "asset": "onboarding.svg",
+      "screens": [
+        "ob1",
+        "ob2",
+        "ob3"
+      ],
+      "number": "02"
+    },
+    {
+      "asset": "discovery.svg",
+      "screens": [
+        "picker-with-permission",
+        "preset-preview"
+      ],
+      "number": "03"
+    },
+    {
+      "asset": "editing-before-after.svg",
+      "screens": [
+        "old-effects",
+        "auto-blur"
+      ],
+      "number": "04"
+    },
+    {
+      "asset": "editing-modes.svg",
+      "screens": [
+        "auto-blur1",
+        "auto-blur-2",
+        "auto-blur-3",
+        "unblur"
+      ],
+      "number": "05"
+    },
+    {
+      "asset": "ai-before-after.svg",
+      "screens": [
+        "old-editing-ai-filter-16",
+        "editing-ai-filter-174",
+        "editing-ai-filter-181"
+      ],
+      "number": "06"
+    },
+    {
+      "asset": "feature-entry.svg",
+      "screens": [
+        "home-1",
+        "home-3"
+      ],
+      "number": "07"
+    },
+    {
+      "asset": "premium-before-after.svg",
+      "screens": [
+        "old-weekly-free-trial",
+        "varient-1"
+      ],
+      "number": "08"
+    },
+    {
+      "asset": "offers.svg",
+      "screens": [
+        "varient-4",
+        "varient-5"
+      ],
+      "number": "09"
+    },
+    {
+      "asset": "hero-studio.webp",
+      "screens": [
+        "portrait-picture"
+      ],
+      "number": "HERO"
+    }
+  ]
+}

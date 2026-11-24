@@ -56,7 +56,7 @@ begin
   on conflict(id) do update set content = excluded.content, sort_order = excluded.sort_order, published_at = now();
   -- Reuse immutable published URLs on subsequent edits instead of copying files again.
   update public.project_drafts set content = draft.content
-    || jsonb_build_object('thumbnail', published_content->'thumbnail', 'heroImage', published_content->'heroImage', 'gallery', published_content->'gallery')
+    || jsonb_build_object('thumbnail', published_content->'thumbnail', 'bentoImage', published_content->'bentoImage', 'heroImage', published_content->'heroImage', 'gallery', published_content->'gallery')
     || case when jsonb_typeof(draft.content->'sections') = 'array' then
       jsonb_build_object('sections', coalesce((
         select jsonb_agg(coalesce((select item from jsonb_array_elements(published_content->'sections') item where item->>'id' = original->>'id' limit 1), original) order by position)

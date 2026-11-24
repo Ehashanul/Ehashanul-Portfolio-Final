@@ -94,3 +94,11 @@ In **Edit project**, use **Project details page** to manage the headline, introd
 Use **Case study sections** to add text, full-width images, galleries, results, or links. Sections can be reordered, hidden, or removed. Text supports editorial or wide layouts; galleries support one or two columns, descriptions, captions, and image ordering. Empty sections are omitted. Existing projects use their saved sections or a suggested structure based on their existing content, so no content migration is required.
 
 **Preview draft** renders the same case-study component as the public website and resolves private uploaded images for the signed-in editor. **Save draft** keeps edits private; **Save & publish** releases the new version and its visible images. Hidden sections remain in the private draft. These settings use the existing JSON content fields; no new Supabase migration is needed.
+
+## Apply the prepared Unblur and Blur Photo Editor update
+
+For an existing Supabase project, run `supabase/migrations/002_case_study_content.sql` in **SQL Editor**. Do not rerun `001_portfolio.sql`.
+
+The update stores the current case-study copy, mockup paths, homepage thumbnails, role, timeline, and project status. It also updates `publish_project` to reuse published bento-image URLs. It retains custom and hidden draft sections, retains already-public custom sections, skips trashed projects, and does not publish projects that are currently unpublished. The other three project records are untouched.
+
+The mockups are hosted with the portfolio in `public/projects/`, so no Storage bucket change is required. Regenerate the prepared update after a source content revision with `node scripts/build-supabase-content-sync.cjs`.

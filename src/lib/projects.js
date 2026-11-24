@@ -57,6 +57,7 @@ export async function publishDraft(draft) {
     return url;
   };
   content.thumbnail = await publishImage(content.thumbnail);
+  content.bentoImage = await publishImage(content.bentoImage);
   content.heroImage = await publishImage(content.heroImage);
   content.gallery = await Promise.all((content.gallery || []).filter(Boolean).map(publishImage));
   if (Array.isArray(content.sections)) {

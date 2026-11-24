@@ -1,4 +1,4 @@
-import test from 'node:test';
+﻿import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { SourceTextModule, SyntheticModule } from 'node:vm';
@@ -146,11 +146,12 @@ test('authored copy fills both live case studies and preserves images and visibi
   const filled = populateCaseStudy(original);
   assert.ok(filled.headline.length > 20);
   assert.ok(filled.summary.length > 100);
-  assert.equal(filled.thumbnail, original.thumbnail);
+  assert.equal(filled.thumbnail, '/projects/unblur/cover-v2.svg');
+  assert.equal(original.thumbnail, '/cover.png');
   assert.equal(filled.hideCardSubtitle, true);
   assert.equal(filled.sections.find(section => section.id === 'private').hidden, true);
   assert.equal(filled.sections.find(section => section.id === 'custom').src, '/my-image.png');
-  assert.ok(filled.sections.find(section => section.id === 'goals').body.length > 100);
+  assert.ok(filled.sections.find(section => section.id === 'onboarding-story').body.length > 100);
   assert.equal(original.sections[0].body, 'Modernize');
   const android = populateCaseStudy({ id: 'project-03b9e759-7ea5-474a-9ee6-f356d141f71c', title: 'App', description: 'Nice', hideCardTitle: true });
   assert.equal(android.title, 'Blur Photo Editor');
@@ -197,4 +198,74 @@ test('requested project setup skips existing and trashed entries and publishes o
   assert.equal(published[0].updated_at, 'saved');
   const again = await module.namespace.seedRequestedProjects([...current, saves[0]], requested, () => { throw Error('Must not overwrite'); }, () => {});
   assert.equal(again, 0);
+});
+
+test('Unblur case study uses the supplied screens and qualitative owner-reported results', async () => {
+  const source = await readFile(new URL('../src/data/caseStudyCopy.js', import.meta.url), 'utf8');
+  const module = new SourceTextModule(source);
+  await module.link(() => { throw new Error('Unexpected dependency'); });
+  await module.evaluate();
+  const project = module.namespace.populateCaseStudy({ id: 'project-9919bf33-980d-4653-8e5b-1c66e34e5b7e', title: 'Unblur', sections: [] });
+  assert.equal(project.role, 'Lead UI/UX Designer');
+  assert.equal(project.unblurStoryVersion, 1);
+  assert.match(project.summary, /download and purchase rates/);
+  assert.ok(!/\d+\s*%/.test(JSON.stringify(project.sections)));
+  const results = project.sections.find(section => section.id === 'project-results');
+  assert.equal(results.items.length, 2);
+  assert.match(results.items[0].label, /Download/);
+  assert.match(results.items[1].label, /Purchase/);
+  for (const section of project.sections.filter(section => section.type === 'image')) {
+    const asset = await readFile(new URL(`../public${section.src}`, import.meta.url), 'utf8');
+    if (section.src.endsWith('.svg')) assert.ok(asset.includes('data:image/webp;base64,'));
+    assert.ok(!asset.includes('C:\\Users'));
+  }
+  await readFile(new URL(`../public${project.heroImage}`, import.meta.url));
+  const edited = { ...project, summary: 'My updated introduction', sections: [] };
+  assert.equal(module.namespace.populateCaseStudy(edited), edited);
+});
+
+
+test('Unblur assigns each supplied screen to one iPhone 18 Pro composition', async () => {
+  const manifest = JSON.parse(await readFile(new URL('../public/projects/unblur/mockup-manifest.json', import.meta.url), 'utf8'));
+  assert.equal(manifest.device, 'iPhone 18 Pro');
+  const used = manifest.compositions.flatMap(composition => composition.screens);
+  assert.equal(used.length, 8);
+  assert.equal(new Set(used).size, 8);
+  for (const composition of manifest.compositions) {
+    const data = await readFile(new URL(`../public/projects/unblur/${composition.asset}`, import.meta.url));
+    if (composition.asset.endsWith('.svg')) {
+      const markers = [...data.toString().matchAll(/data-screen="([^"]+)"/g)].map(match => match[1]);
+      assert.deepEqual(markers, composition.screens);
+      if (markers.length) assert.ok(data.toString().includes('iPhone 18 Pro mockup'));
+    }
+  }
+});
+
+
+test('Blur Photo Editor documents the lead role, relaunch, ongoing work, and unique comparisons', async () => {
+  const source = await readFile(new URL('../src/data/caseStudyCopy.js', import.meta.url), 'utf8');
+  const module = new SourceTextModule(source);
+  await module.link(() => { throw new Error('Unexpected dependency'); });
+  await module.evaluate();
+  const project = module.namespace.populateCaseStudy({ id: 'project-03b9e759-7ea5-474a-9ee6-f356d141f71c', title: 'App', sections: [{ id: 'private-notes', type: 'text', body: 'Private', hidden: true }] });
+  assert.equal(project.title, 'Blur Photo Editor');
+  assert.match(project.role, /Lead/);
+  assert.match(project.duration, /1 year/);
+  assert.match(project.status, /Ongoing/);
+  assert.match(project.summary, /relaunch/);
+  assert.ok(!/\d+\s*%/.test(JSON.stringify(project.sections)));
+  assert.ok(project.sections.find(section => section.id === 'private-notes').hidden);
+  const visuals = project.sections.filter(section => section.type === 'image');
+  assert.equal(visuals.length, 9);
+  const manifest = JSON.parse(await readFile(new URL('../public/projects/blur-photo-editor/mockup-manifest.json', import.meta.url), 'utf8'));
+  const screens = manifest.compositions.flatMap(item => item.screens);
+  assert.equal(screens.length, new Set(screens).size);
+  assert.ok(screens.includes('old-home'));
+  assert.ok(screens.includes('main-home'));
+  for (const item of manifest.compositions) {
+    const bytes = await readFile(new URL(`../public/projects/blur-photo-editor/${item.asset}`, import.meta.url));
+    if (item.asset.endsWith('.svg')) assert.deepEqual([...bytes.toString().matchAll(/data-screen="([^"]+)"/g)].map(match => match[1]), item.screens);
+  }
+  const edited = { ...project, summary: 'My edited copy', sections: [] };
+  assert.equal(module.namespace.populateCaseStudy(edited), edited);
 });

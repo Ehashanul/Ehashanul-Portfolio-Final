@@ -106,3 +106,9 @@ The mockups are hosted with the portfolio in `public/projects/`, so no Storage b
 ### Aligned project thumbnail
 
 After deploying the updated assets, run `supabase/migrations/003_aligned_thumbnail.sql` in SQL Editor to store the proportion-correct Blur Photo Editor thumbnail. It only updates the generated thumbnail path/version, skips trashed projects, and leaves custom thumbnail URLs unchanged. Page transitions require no Supabase changes.
+
+### Organized case studies and new projects
+
+After deploying the latest assets, run `supabase/migrations/004_organized_case_studies.sql` in Supabase SQL Editor. It saves the concise Details → Challenges → What I did → Results structure, Beauty Editor mockups, and the ongoing/unreleased ZStack entry. Existing publication status, display order, selected-project settings, custom sections, and hidden draft blocks are retained. Missing requested entries are created and published as portfolio case studies. This does not indicate that the ZStack app has launched.
+
+Generate this migration with `node scripts/build-organized-content-sync.cjs`; do not regenerate previously applied migrations 002 or 003.

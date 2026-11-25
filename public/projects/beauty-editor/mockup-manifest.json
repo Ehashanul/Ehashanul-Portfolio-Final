@@ -1,0 +1,64 @@
+{
+  "project": "Beauty Editor",
+  "platforms": [
+    "iOS",
+    "Android"
+  ],
+  "compositions": [
+    {
+      "asset": "hero.svg",
+      "screens": [
+        "android-home",
+        "ios-home"
+      ],
+      "preview": false
+    },
+    {
+      "asset": "thumbnail.svg",
+      "screens": [
+        "android-home"
+      ],
+      "preview": true
+    },
+    {
+      "asset": "retouch.svg",
+      "screens": [
+        "android-retouch",
+        "ios-retouch"
+      ],
+      "preview": false
+    },
+    {
+      "asset": "reshape.svg",
+      "screens": [
+        "android-reshape",
+        "ios-reshape"
+      ],
+      "preview": false
+    },
+    {
+      "asset": "makeup.svg",
+      "screens": [
+        "android-makeup",
+        "ios-makeup"
+      ],
+      "preview": false
+    },
+    {
+      "asset": "premium.svg",
+      "screens": [
+        "android-premium",
+        "ios-premium"
+      ],
+      "preview": false
+    },
+    {
+      "asset": "save-share.svg",
+      "screens": [
+        "android-save",
+        "ios-save"
+      ],
+      "preview": false
+    }
+  ]
+}

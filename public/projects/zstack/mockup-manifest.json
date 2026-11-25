@@ -1,0 +1,26 @@
+{
+  "status": "Ongoing, unreleased",
+  "originals": [
+    "workspace",
+    "crop",
+    "adjust",
+    "pages",
+    "layers",
+    "type",
+    "export"
+  ],
+  "iconRefinements": {
+    "pages": [
+      "Duplicate",
+      "Save template",
+      "Restyle",
+      "Resize",
+      "Templates"
+    ],
+    "adjust": [
+      "Contrast",
+      "Saturation",
+      "Highlights"
+    ]
+  }
+}

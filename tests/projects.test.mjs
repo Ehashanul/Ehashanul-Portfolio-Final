@@ -151,12 +151,12 @@ test('authored copy fills both live case studies and preserves images and visibi
   assert.equal(filled.hideCardSubtitle, true);
   assert.equal(filled.sections.find(section => section.id === 'private').hidden, true);
   assert.equal(filled.sections.find(section => section.id === 'custom').src, '/my-image.png');
-  assert.ok(filled.sections.find(section => section.id === 'onboarding-story').body.length > 100);
+  assert.ok(filled.sections.find(section => section.id === 'contributions').body.length > 100);
   assert.equal(original.sections[0].body, 'Modernize');
   const android = populateCaseStudy({ id: 'project-03b9e759-7ea5-474a-9ee6-f356d141f71c', title: 'App', description: 'Nice', hideCardTitle: true });
   assert.equal(android.title, 'Blur Photo Editor');
   assert.equal(android.hideCardTitle, true);
-  assert.ok(android.sections.filter(section => section.type === 'text').length >= 5);
+  assert.ok(android.sections.filter(section => section.type === 'text' && !section.hidden).length === 3);
   const edited = { ...filled, headline: '', sections: [] };
   assert.equal(populateCaseStudy(edited), edited);
   const custom = { id: 'another-project', title: 'My project' };
@@ -208,7 +208,7 @@ test('Unblur case study uses the supplied screens and qualitative owner-reported
   const project = module.namespace.populateCaseStudy({ id: 'project-9919bf33-980d-4653-8e5b-1c66e34e5b7e', title: 'Unblur', sections: [] });
   assert.equal(project.role, 'Lead UI/UX Designer');
   assert.equal(project.unblurStoryVersion, 1);
-  assert.match(project.summary, /download and purchase rates/);
+  assert.match(project.sections.find(section => section.id === 'outcomes').body, /Download and purchase rates/i);
   assert.ok(!/\d+\s*%/.test(JSON.stringify(project.sections)));
   const results = project.sections.find(section => section.id === 'project-results');
   assert.equal(results.items.length, 2);
@@ -268,4 +268,47 @@ test('Blur Photo Editor documents the lead role, relaunch, ongoing work, and uni
   }
   const edited = { ...project, summary: 'My edited copy', sections: [] };
   assert.equal(module.namespace.populateCaseStudy(edited), edited);
+});
+
+test('Beauty Editor credits the assistant role and preserves all cross-platform screens', async () => {
+  const source = await readFile(new URL('../src/data/caseStudyCopy.js', import.meta.url), 'utf8');
+  const module = new SourceTextModule(source);
+  await module.link(() => { throw new Error('Unexpected dependency'); });
+  await module.evaluate();
+  const project = module.namespace.populateCaseStudy({ id: 'beauty-editor', title: 'Beauty Editor', sections: [{id:'private-note', type:'text', body:'Private', hidden:true}] });
+  assert.equal(project.role, 'Assistant UI/UX Designer');
+  assert.equal(project.platform, 'iOS & Android');
+  assert.match(project.summary, /assets/);
+  assert.ok(!/lead designer|led the project|\d+\s*%/i.test(JSON.stringify(project.sections)));
+  assert.equal(project.sections.find(section => section.id === 'private-note').hidden, true);
+  const manifest = JSON.parse(await readFile(new URL('../public/projects/beauty-editor/mockup-manifest.json', import.meta.url), 'utf8'));
+  const main = manifest.compositions.filter(item => !item.preview);
+  const screens = main.flatMap(item => item.screens);
+  assert.equal(screens.length, 12);
+  assert.equal(new Set(screens).size, 12);
+  for (const item of manifest.compositions) {
+    const svg = await readFile(new URL(`../public/projects/beauty-editor/${item.asset}`, import.meta.url), 'utf8');
+    assert.deepEqual([...svg.matchAll(/data-screen="([^"]+)"/g)].map(match => match[1]), item.screens);
+    assert.ok(svg.includes('preserveAspectRatio="xMidYMid meet"'));
+  }
+  await readFile(new URL(`../public${project.heroImage}`, import.meta.url));
+  await readFile(new URL(`../public${project.bentoImage}`, import.meta.url));
+  const edited = {...project, sections:[], summary:'Updated by owner'};
+  assert.equal(module.namespace.populateCaseStudy(edited), edited);
+});
+
+
+test('case studies follow challenge, contribution, evidence, and results with concise copy', async () => {
+  const module = new SourceTextModule(await readFile(new URL('../src/data/caseStudyCopy.js', import.meta.url), 'utf8'));
+  await module.link(() => { throw new Error('Unexpected dependency'); });
+  await module.evaluate();
+  for (const id of ['project-9919bf33-980d-4653-8e5b-1c66e34e5b7e','project-03b9e759-7ea5-474a-9ee6-f356d141f71c','beauty-editor','zstack']) {
+    const project = module.namespace.populateCaseStudy({id,title:id,sections:[]});
+    const visible = project.sections.filter(section => !section.hidden);
+    assert.deepEqual(visible.slice(0,2).map(section => section.id),['challenge','contributions']);
+    assert.ok(visible.findIndex(section => section.id === 'outcomes') > 1);
+    assert.ok(visible.filter(section => section.type === 'text').every(section => section.body.length < 600));
+    const edited = {...project,summary:'Owner edit',sections:[]};
+    assert.equal(module.namespace.populateCaseStudy(edited),edited);
+  }
 });

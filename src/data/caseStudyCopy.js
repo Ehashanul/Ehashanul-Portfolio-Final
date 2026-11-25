@@ -66,7 +66,8 @@ function populateResults(project) {
   return { ...project, caseStudyResultsVersion: 1, sections: sections.some(section => section.type === 'metrics') ? sections : [...sections, { id: 'project-results', type: 'metrics', heading: 'Results', items: structuredClone(items) }] };
 }
 
-export function populateCaseStudy(project) {
+function populateOriginalCaseStudy(project) {
+  project = populateBeautyCaseStudy(project);
   project = populateBlurPhotoCaseStudy(project);
   project = populateUnblurMockups(populateUnblurCaseStudy(project));
   const copy = COPY[project.id];
@@ -228,4 +229,105 @@ function populateBlurPhotoCaseStudy(project) {
     thumbnail: '/projects/blur-photo-editor/cover.svg', thumbnailAlt: 'Blur Photo Editor identity with layered violet and orange forms',
     bentoImage: '/projects/blur-photo-editor/thumbnail-onboarding-aligned.webp', heroImage: '/projects/blur-photo-editor/hero-studio.webp', heroAlt: 'The redesigned Blur Photo Editor workspace in a black Android device mockup', heroCaption: 'Blur Photo Editor / Lead design, relaunch, and ongoing management', hideHero: false, gallery: [], sections,
   };
+}
+
+// Owner-confirmed supporting role: asset management and design refinements
+// across both platforms. No timeline, growth figures, or lead ownership assumed.
+function populateBeautyCaseStudy(project) {
+  if (project.id !== 'beauty-editor' || project.beautyStoryVersion >= 2) return project;
+  const visual = (id, file, alt, caption) => ({ id, type: 'image', src: `/projects/beauty-editor/${file}.svg`, alt, caption });
+  const narrative = [
+    text('overview', 'Good product work also lives in the details.', 'Beauty Editor brings together portrait retouching, reshaping, makeup, and finishing tools across iOS and Android. I contributed to the project as an assistant designer, helping manage visual assets and make design refinements.\n\nMy work supported the wider design effort through practical attention to the interface: preparing the visual material used across screens and helping refine how the product was presented on each platform.'),
+    text('contributions', 'Supporting the design through assets and refinements.', 'My contribution centered on asset management and design tweaks across the iOS and Android versions. Working with screens from both platforms meant paying attention to the details that support a coherent product: imagery, interface presentation, and the relationship between the tools and the photograph.\n\nThis case study presents the product screens as context for that supporting contribution. The scope includes editing tools, premium access, and the save-and-share experience.'),
+    text('retouch-story', 'Let the portrait stay prominent.', 'Both retouch screens keep the portrait prominent, with smoothing controls close to the image. Android groups related retouch options beneath the photograph, while iOS presents its face adjustments along the bottom.\n\nThese equivalent screens show how the same task is presented on each platform, with distinct control layouts and a shared emphasis on the result.'),
+    visual('retouch-visual', 'retouch', 'Beauty Editor Android and iOS retouch screens with Smooth adjustments', '01 / Retouching on Android and iOS'),
+    text('reshape-story', 'Related capabilities, platform-specific presentation.', 'The Android reshape screen presents presets and facial areas in horizontal groups. The iOS screen shows an adjustment value alongside a selection of facial controls.\n\nBoth place the portrait above the editing interface, but their layouts and visual treatments differ. My cross-platform support involved working within these distinct presentations while helping with assets and design refinements.'),
+    visual('reshape-visual', 'reshape', 'Android reshape presets and iOS facial adjustment controls shown side by side', '02 / Android presets and iOS reshape controls'),
+    text('makeup-story', 'Make small choices easy to identify.', 'Both makeup screens place color choices beneath the portrait. Android shows its color palette and makeup categories, while iOS uses a compact swatch strip. The selected controls remain close to the photograph.\n\nThis is the kind of detailed interface presentation where supporting design work matters: visual assets and small refinements need to sit comfortably within the wider screen.'),
+    visual('makeup-visual', 'makeup', 'Beauty Editor Android and iOS makeup screens with color selection', '03 / Makeup and color selection on both platforms'),
+    text('premium-story', 'Keep premium access connected to the product.', 'The Android subscription screen uses a feature comparison and plan cards to introduce premium access. The iOS presentation is more image-led, placing the offer over a portrait with the subscription choices and primary action below.\n\nThe supplied screens show two approaches within the same product. They provide context for the cross-platform asset and refinement work, with each interface retaining its own presentation.'),
+    visual('premium-visual', 'premium', 'Beauty Editor Android subscription comparison and iOS premium offer', '04 / Android and iOS premium-access screens'),
+    text('save-story', 'Finish with a clear confirmation.', 'Both platforms confirm that the edited photograph has been saved. Android places sharing destinations and further content below the result, while iOS groups watermark removal, a new-photo action, and sharing beneath the image.\n\nThese screens complete the editing journey and show how the product’s supporting actions are organized around the finished photograph.'),
+    visual('save-visual', 'save-share', 'Beauty Editor saved-result screens on Android and iOS', '05 / Save confirmation and sharing across both platforms'),
+    text('contribution-summary', 'A collaborative contribution across two platforms.', 'My role in Beauty Editor was to support the design through asset management and interface refinements across iOS and Android. The work reflects the practical, collaborative side of product design: making the visual material and smaller decisions fit the wider experience.\n\nThe screens bring that contribution into context across the editing tools and the supporting product flows.'),
+    { id: 'project-results', type: 'metrics', heading: 'Contribution', items: [{ value: '02', label: 'Platforms supported: iOS and Android' }, { value: 'Support', label: 'Asset management and design refinements' }] },
+  ];
+  const existing = project.sections || [];
+  const legacy = new Set(['overview','challenge','direction','project-results']);
+  const sections = narrative.map(section => existing.find(item => item.id === section.id)?.hidden ? { ...section, hidden: true } : section);
+  sections.push(...existing.filter(section => !legacy.has(section.id) && !narrative.some(item => item.id === section.id)));
+  return { ...project, beautyStoryVersion: 2, title: 'Beauty Editor', platform: 'iOS & Android', role: 'Assistant UI/UX Designer',
+    headline: 'Supporting the details across iOS and Android.',
+    summary: 'I worked on Beauty Editor as an assistant designer across the iOS and Android versions, helping manage visual assets and refine interface details. My contribution supported the broader design effort across the portrait-editing experience and its surrounding screens.',
+    sub: 'Cross-platform beauty editing', description: 'Assistant design across iOS and Android, focused on asset management and thoughtful interface refinements.',
+    deliverables: ['Asset management', 'Design refinements', 'iOS design support', 'Android design support'],
+    thumbnail: '/projects/beauty-editor/thumbnail.webp', bentoImage: '/projects/beauty-editor/thumbnail.webp', thumbnailAlt: 'Beauty Editor Android home screen in a proportion-correct rose studio mockup',
+    heroImage: '/projects/beauty-editor/hero.webp', heroAlt: 'Beauty Editor Android and iOS home screens presented side by side', heroCaption: 'Beauty Editor / Assistant design across iOS and Android', hideHero: false, gallery: [], sections,
+  };
+}
+
+
+// One-time editorial update. Subsequent admin edits retain their saved copy.
+export function populateCaseStudy(project) {
+  return organizeCaseStudy(populateOriginalCaseStudy(project));
+}
+
+function organizeCaseStudy(project) {
+  if (project.caseStudyFlowVersion >= 1) return project;
+  const stories = {
+    'project-9919bf33-980d-4653-8e5b-1c66e34e5b7e': {
+      headline: 'A clearer path from first impression to PRO.',
+      summary: 'I was the main designer of Unblur, an iOS photo-editing app. My work covered onboarding, editing, premium access, and the supporting app experience.',
+      challenge: 'Make the value of photo enhancement clear from the first screen, then guide users through editing and premium access without competing actions.',
+      contribution: 'I designed the onboarding around a visible before-and-after benefit. I organized editing controls around the photo, made premium entry points distinct, and connected saving, purchase confirmation, settings, and feedback through the same visual language.',
+      result: 'Download and purchase rates increased following my design work. Exact figures are not included because they have not been provided.',
+      metrics: [{value:'Increased',label:'Download rate — owner-reported'},{value:'Increased',label:'Purchase rate — owner-reported'}],
+    },
+    'project-03b9e759-7ea5-474a-9ee6-f356d141f71c': {
+      headline: 'Simpler editing. A relaunch I led.',
+      summary: 'I led design and managed Blur Photo Editor through a roughly year-long relaunch. I continue to manage the app today.',
+      challenge: 'A growing collection of tools made editing harder to navigate. The relaunch needed to help users find a tool, understand its controls, and stay focused on their photo.',
+      contribution: 'I reorganized tool discovery and editing flows, introduced task-specific controls, and made adjustment patterns more consistent across modes. I also worked on onboarding and premium screens, and managed the project through relaunch.',
+      result: 'The redesigned app was relaunched with clearer editing flows and more consistent controls. I continue to manage the product. No quantified usability or commercial results are available for this case study.',
+      metrics: [{value:'Relaunched',label:'New editing experience delivered'},{value:'Ongoing',label:'Product management after launch'}],
+    },
+    'beauty-editor': {
+      headline: 'Design support across iOS and Android.',
+      summary: 'As an assistant designer on Beauty Editor, I helped manage assets and refine interface details across the iOS and Android apps.',
+      challenge: 'Support two platform versions with different layouts while keeping visual assets and interface details coherent across editing and supporting flows.',
+      contribution: 'I helped manage design assets and made interface tweaks across iOS and Android. My contribution supported the wider design team across the editing experience and its surrounding screens.',
+      result: 'My contribution was asset management and design refinements across both platforms. The paired screens show the product context; no measured usability or business outcome is claimed.',
+    },
+    zstack: {
+      headline: 'A template editor, still taking shape.',
+      summary: 'ZStack is the working name of an ongoing, unreleased mobile editor. The current direction brings images, pages, layers, typography, and export into one workspace.',
+      challenge: 'Keep the artwork visible while making page management, image tools, layers, and export easy to distinguish within a compact mobile interface.',
+      contribution: 'The current screens explore a canvas-first workspace, focused crop and adjustment panels, page previews, a layer list, typography choices, and export settings. For this portfolio presentation, repeated placeholder icons were replaced with tool-specific symbols. My project role is still to be specified.',
+      result: 'The project is in progress and has not been released. These screens show the current design direction; launch results and validated user outcomes are not available yet.',
+    },
+  };
+  const story = stories[project.id];
+  if (!story) {
+    if (!['time-warp','retouch'].includes(project.id)) return project;
+    const existing = project.sections || [];
+    return {...project,caseStudyFlowVersion:1,sections:[
+      text('challenge','Challenges',existing.find(item => item.id === 'challenge')?.body || ''),
+      text('contributions','Design direction',existing.find(item => item.id === 'direction')?.body || ''),
+      ...existing.filter(item => item.type !== 'text' || !['overview','challenge','direction'].includes(item.id)),
+      text('outcomes','Results','This entry presents a design direction. A confirmed implementation scope and measured results have not been added yet.'),
+    ]};
+  }
+  const existing = project.sections || [];
+  const generatedIds = new Set(['overview','contributions','challenge','goals','research','process','decisions','gallery-intro','validation','outcomes','lessons','project-results','onboarding-story','discovery-story','editing-story','editing-modes-story','ai-story','feature-entry-story','premium-story','offers-story','relaunch-story','completion-story','settings-story','feedback-story','retouch-story','reshape-story','makeup-story','save-story','contribution-summary','image-story','composition-story','export-story','project-state','feature-story','upgrade-story','access-story','purchase-story','feature-access-story','upgrade-intro','support-story']);
+  const section = (id,heading,body) => {
+    const prior = existing.find(item => item.id === id);
+    return {...text(id,heading,body), ...(prior?.hidden ? {hidden:true} : {})};
+  };
+  const visuals = existing.filter(item => item.type === 'image' || item.type === 'gallery');
+  const custom = existing.filter(item => !generatedIds.has(item.id) && item.type !== 'image' && item.type !== 'gallery');
+  const hidden = existing.filter(item => generatedIds.has(item.id) && item.hidden && !['challenge','contributions','outcomes','project-results'].includes(item.id));
+  const sections = [section('challenge','Challenges',story.challenge),section('contributions','What I did',story.contribution),...visuals,section('outcomes','Results',story.result)];
+  if (story.metrics) sections.push({id:'project-results',type:'metrics',heading:'At a glance',items:story.metrics,...(existing.find(item => item.id === 'project-results')?.hidden ? {hidden:true} : {})});
+  sections.push(...custom,...hidden);
+  return {...project,caseStudyFlowVersion:1,headline:story.headline,summary:story.summary,sections};
 }
